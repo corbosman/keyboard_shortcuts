@@ -1,0 +1,11 @@
+CHANGELOG keyboard_shortcuts
+============================
+
+RELEASE 2.0
+-----------
+
+- move to github
+- bugfix: dont fire when user is holding a meta key
+- bugfix: many browser can bind to both body and document, dont run both. $(document) should work everywhere
+- bug:fix we can be in any input element, make sure we dont interfere
+
