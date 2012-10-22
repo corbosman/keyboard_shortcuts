@@ -14,5 +14,5 @@
 	<version>
 		<release>2.0</release>
 	</version>
-	<license uri="http://www.gnu.org/licenses/gpl.html">GNU GPLv3</license>
+	<license uri="http://www.gnu.org/licenses/gpl-2.0.html">GNU GPLv2</license>
 </package>
