@@ -1,0 +1,18 @@
+{
+  "name":"cor/keyboard_shortcuts",
+  "description":"allows some functionality to be handled with the keyboard",
+  "license":"GPL-2.0",
+  "homepage":"https://github.com/corbosman/keyboard_shortcuts",
+  "authors": [
+          {
+              "name": "Cor Bosman",
+              "email": "cor@roundcu.be",
+              "homepage": "http://underwa.ter.net",
+              "role": "Developer"
+          }
+      ],
+  "support": {
+          "email": "cor@roundcu.be",
+          "issues": "https://github.com/corbosman/keyboard_shortcuts/issues"
+      }
+}
