@@ -27,7 +27,6 @@ $(function() {
 
   // fire up the keypress event listener
   $(document).keypress(function (e) { 
-    console.log("key pressed");
     key_pressed(e);
   });
 
