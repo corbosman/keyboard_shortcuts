@@ -7,5 +7,6 @@ $labels['help'] = 'Help';
 $labels['selectallvisiblemessages'] = 'Select all visible messages';
 $labels['markallvisiblemessagesasread'] = 'Mark all visible messages as read';
 $labels['title'] = 'Shortcuts';
-
+$labels['previousmessage'] = 'Show previous page';
+$labels['nextmessage'] = 'Show next page';
 ?>
