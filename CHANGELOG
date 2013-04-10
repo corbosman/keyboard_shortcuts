@@ -1,6 +1,11 @@
 CHANGELOG keyboard_shortcuts
 ============================
 
+RELEASE 2.1
+
+- added Russian translation
+- bugfix: j/k keys were documented wrong
+
 RELEASE 2.0
 -----------
 
