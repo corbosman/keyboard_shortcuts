@@ -50,7 +50,7 @@ $(function() {
 
           return false;
         case 65:		// A = mark all as read
-          rcmail.command('select-all');
+          rcmail.command('select-all', 'page');
           rcmail.command('mark', 'read');
           return false;
         case 67:                // C = collapse-all
@@ -67,7 +67,7 @@ $(function() {
           rcmail.command('expand-unread');
           return false;
         case 97:		// a = select all
-          rcmail.command('select-all');
+          rcmail.command('select-all', 'page');
           return false;
         case 99:		// c = compose
           rcmail.command('compose');
