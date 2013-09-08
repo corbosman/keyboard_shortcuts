@@ -1,7 +1,7 @@
 CHANGELOG keyboard_shortcuts
 ============================
 
-RELEASE 2.2
+RELEASE 2.3
 
 - added extra check on input fields (fix by Rosali)
 - fixed Select All Visible keyboard shortcut (fix by Rodrigo Castillo)
