@@ -26,8 +26,10 @@ $(function() {
   });
 
   // fire up the keypress event listener
-  $(document).keypress(function (e) { 
-    key_pressed(e);
+  $(document).keypress(function (e) {
+    if (!$(e.target).is(":input")) {
+      key_pressed(e);
+    }  
   });
 
 
