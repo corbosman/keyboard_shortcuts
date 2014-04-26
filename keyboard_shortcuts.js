@@ -15,18 +15,12 @@ $(function() {
     title: rcmail.gettext("keyboard_shortcuts.keyboard_shortcuts")
   });
 
-  // if we're in an input or textarea form, skip this plugin
-  $('input,textarea').focus(function (e) {
-    rcmail.env.keyboard_shortcuts = false;
-  });
-
-  // if we move out of an input or textarea form, enable this plugin
-  $('input,textarea').blur(function (e) {
-    rcmail.env.keyboard_shortcuts = true;
-  });
-
   // fire up the keypress event listener
-  $(document).keypress(function (e) { 
+  $(document).keypress(function (e) {
+
+    // check if some element has focus. If it does, skip this plugin.
+    if ( $("*:focus").is("textarea, input") ) return;
+
     key_pressed(e);
   });
 
