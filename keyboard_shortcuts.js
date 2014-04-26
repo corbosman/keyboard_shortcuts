@@ -3,7 +3,6 @@ function keyboard_shortcuts_show_help() {
 }
 
 $(function() {
-  rcmail.env.keyboard_shortcuts = true;
 
   // initialize a dialog window
   $('#keyboard_shortcuts_help').dialog({
@@ -26,7 +25,7 @@ $(function() {
 
 
   function key_pressed (e) {
-    if (!rcmail.env.keyboard_shortcuts || rcmail.env.action == 'compose' || rcmail.env.task == 'login' || e.ctrlKey || e.metaKey)
+    if (rcmail.env.action == 'compose' || rcmail.env.task == 'login' || e.ctrlKey || e.metaKey)
     return true;
 
     if (rcmail.env.action == '') {	// list mailbox
