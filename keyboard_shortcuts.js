@@ -16,18 +16,21 @@ $(function() {
 
   // fire up the keypress event listener
   $(document).keypress(function (e) {
-
-    // check if some element has focus. If it does, skip this plugin.
-    if ( $("*:focus").is("textarea, input") ) return;
-
-    key_pressed(e);
-    e.preventDefault();
+    return key_pressed(e);
   });
 
 
   function key_pressed (e) {
-    if (rcmail.env.action == 'compose' || rcmail.env.task == 'login' || e.ctrlKey || e.metaKey)
-    return true;
+    // special case. If we hit ctrl-enter, and we're composing, and we have focus, then send email
+    if (rcmail.env.action == 'compose' && e.which == 13 && e.ctrlKey && $("*:focus").is("#composebody")) {
+      $('.button.send').click();
+      return false;
+    }
+
+    // check if some element has focus. If it does, skip this plugin.
+    if ( $("*:focus").is("textarea, input") ) return true;
+
+    if (rcmail.env.action == 'compose' || rcmail.env.task == 'login' || e.ctrlKey || e.metaKey) return true;
 
     if (rcmail.env.action == '') {	// list mailbox
 
@@ -124,6 +127,7 @@ $(function() {
 
       }
     }
+    e.preventDefault();
   }
 });
 

@@ -2,16 +2,16 @@
 /**
  * keyboard_shortcuts
  *
- * Enables some common tasks to be executed with keyboard shortcuts 
+ * Enables some common tasks to be executed with keyboard shortcuts
  *
  * @version 1.4 - 07.07.2010
  * @author Patrik Kullman / Roland 'rosali' Liebl / Cor Bosman <roundcube@wa.ter.net>
  * @licence GNU GPL
- * 
+ *
  **/
  /** *
  **/
- 
+
 /**
  * Shortcuts, list view:
  * ?:	Show shortcut help
@@ -45,16 +45,16 @@
 
 class keyboard_shortcuts extends rcube_plugin
 {
-    public $task = 'mail';
-    
+    public $task = 'mail|compose';
+
     function init()
     {
       // only init in authenticated state and if newuserdialog is finished
       // do not init on compose (css incompatibility with compose_addressbook plugin
       $rcmail = rcmail::get_instance();
       $this->require_plugin('jqueryui');
-      
-      if($_SESSION['username'] && empty($_SESSION['plugin.newuserdialog']) && $rcmail->action != 'compose'){
+
+      if($_SESSION['username'] && empty($_SESSION['plugin.newuserdialog'])){
         $this->include_stylesheet('keyboard_shortcuts.css');
         $this->include_script('keyboard_shortcuts.js');
         $this->add_hook('template_container', array($this, 'html_output'));
@@ -64,18 +64,18 @@ class keyboard_shortcuts extends rcube_plugin
 
     function html_output($p) {
       if ($p['name'] == "listcontrols") {
-        $rcmail = rcmail::get_instance();      
+        $rcmail = rcmail::get_instance();
         $skin  = $rcmail->config->get('skin');
-        
+
         if(!file_exists('plugins/keyboard_shortcuts/skins/' . $skin . '/images/keyboard.png')){
           $skin = "default";
         }
-        
+
         $this->load_config();
         $keyboard_shortcuts = $rcmail->config->get('keyboard_shortcuts_extras', array());
-        
+
         $c = "";
-        $c .= '<span id="keyboard_shortcuts_title">' . $this->gettext("title") . ":&nbsp;</span><a id='keyboard_shortcuts_link' href='#' class='button' title='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' onclick='return keyboard_shortcuts_show_help()'><img align='top' src='plugins/keyboard_shortcuts/skins/".$skin."/images/keyboard.png' alt='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' /></a>\n";        
+        $c .= '<span id="keyboard_shortcuts_title">' . $this->gettext("title") . ":&nbsp;</span><a id='keyboard_shortcuts_link' href='#' class='button' title='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' onclick='return keyboard_shortcuts_show_help()'><img align='top' src='plugins/keyboard_shortcuts/skins/".$skin."/images/keyboard.png' alt='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' /></a>\n";
         $c .= "<div id='keyboard_shortcuts_help'>";
         $c .= "<div><h4>".$this->gettext("mailboxview")."</h4>";
         $c .= "<div class='shortcut_key'>?</div> ".$this->gettext('help')."<br class='clear' />";
@@ -91,22 +91,22 @@ class keyboard_shortcuts extends rcube_plugin
         $c .= "<div class='shortcut_key'>R</div> ".$this->gettext('replytoallmessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>s</div> ".$this->gettext('quicksearch')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>u</div> ".$this->gettext('checkmail')."<br class='clear' />";
-        $c .= "<div class='shortcut_key'> </div> <br class='clear' />";        
+        $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
         $c .= "</div>";
 
         if(!is_object($rcmail->imap)){
           $rcmail->imap_connect();
-        } 
-        $threading_supported = $rcmail->imap->get_capability('thread=references')  
-          || $rcmail->imap->get_capability('thread=orderedsubject')  
-          || $rcmail->imap->get_capability('thread=refs');  
-    
+        }
+        $threading_supported = $rcmail->imap->get_capability('thread=references')
+          || $rcmail->imap->get_capability('thread=orderedsubject')
+          || $rcmail->imap->get_capability('thread=refs');
+
         if ($threading_supported) {
           $c .= "<div><h4>".$this->gettext("threads")."</h4>";
           $c .= "<div class='shortcut_key'>E</div> ".$this->gettext('expand-all')."<br class='clear' />";
           $c .= "<div class='shortcut_key'>C</div> ".$this->gettext('collapse-all')."<br class='clear' />";
           $c .= "<div class='shortcut_key'>U</div> ".$this->gettext('expand-unread')."<br class='clear' />";
-          $c .= "<div class='shortcut_key'> </div> <br class='clear' />";        
+          $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
           $c .= "</div>";
         }
         $c .= "<div><h4>".$this->gettext("messagesdisplaying")."</h4>";
@@ -120,9 +120,9 @@ class keyboard_shortcuts extends rcube_plugin
         $c .= "<div class='shortcut_key'>R</div> ".$this->gettext('replytoallmessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
         $c .= "</div></div>";
- 
+
         $rcmail->output->set_env('ks_functions', array('63' => 'ks_help'));
-        
+
         $p['content'] = $c . $p['content'];
       }
       return $p;
