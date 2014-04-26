@@ -21,6 +21,7 @@ $(function() {
     if ( $("*:focus").is("textarea, input") ) return;
 
     key_pressed(e);
+    e.preventDefault();
   });
 
 
