@@ -1,6 +1,16 @@
 CHANGELOG keyboard_shortcuts
 ============================
 
+RELEASE 2.4
+
+- change how we detect focus
+- prevent other keyboard events from firing
+
+RELEASE 2.3
+
+- added extra check on input fields (fix by Rosali)
+- fixed Select All Visible keyboard shortcut (fix by Rodrigo Castillo)
+
 RELEASE 2.1
 
 - added Russian translation
