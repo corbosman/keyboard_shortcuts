@@ -21,3 +21,21 @@
 #keyboard_shortcuts_link {
   width: 31px !important;
 }
+
+/* icon */
+#sections-table #rcmrowkeyboard_shortcuts td.section {
+    background-image: url('/plugins/keyboard_shortcuts/skins/larry/images/keyboard.png');
+    background-position: 3px 7px;
+    background-size: 28px;
+}
+
+#sections-table #rcmrowkeyboard_shortcuts.selected td.section {
+    background-image: url('/plugins/keyboard_shortcuts/skins/larry/images/keyboard.png');
+    background-position: 3px 7px;
+    background-size: 28px;
+}
+
+.rcmfd_ks_input {
+    width: 25px;
+    text-align: center;
+}

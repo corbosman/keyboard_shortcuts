@@ -1,137 +1,172 @@
-function keyboard_shortcuts_show_help() {
-  $('#keyboard_shortcuts_help').dialog('open');
-}
+var ks_oldkey;
+var ks_action;
 
-$(function() {
+$(document).ready(function() {
 
-  // initialize a dialog window
-  $('#keyboard_shortcuts_help').dialog({
-    autoOpen: false,
-    draggable: true,
-    modal: false,
-    resizable: false,
-    width: 750,
-    title: rcmail.gettext("keyboard_shortcuts.keyboard_shortcuts")
-  });
+	// initialize a dialog window
+	$('#keyboard_shortcuts_help').dialog({
+		autoOpen: false,
+		draggable: true,
+		modal: false,
+		resizable: false,
+		width: 750,
+		title: rcmail.gettext("keyboard_shortcuts")
+	});
 
-  // fire up the keypress event listener
-  $(document).keypress(function (e) {
-    return key_pressed(e);
-  });
+    if(rcmail.env.action == 'edit-prefs') {
+	   $('.keycode').focus(function(e) {
+	       ks_record_key($(this),e);
+	   });
+    } else {
+        $(document).keypress(function (e) {
+            return ks_key_pressed(e);
+        });
+    }
 
+    rcmail.register_command('ks_help', 'ks_help', true);
 
-  function key_pressed (e) {
+});
+
+function ks_key_pressed (e) {
+    var action;
+    var commands = {};
+
     // special case. If we hit ctrl-enter, and we're composing, and we have focus, then send email
-    if (rcmail.env.action == 'compose' && e.which == 13 && e.ctrlKey && $("*:focus").is("#composebody")) {
-      $('.button.send').click();
-      return false;
+    if (rcmail.env.action == 'compose' && (e.which == 13 || e.which == 10) && e.ctrlKey && $("*:focus").is("#composebody")) {
+        $('.button.send').click();
+        return false;
     }
 
     // check if some element has focus. If it does, skip this plugin.
     if ( $("*:focus").is("textarea, input") ) return true;
 
-    if (rcmail.env.action == 'compose' || rcmail.env.task == 'login' || e.ctrlKey || e.metaKey) return true;
+    // we dont support meta keys;
+    if (e.ctrlKey || e.metaKey) return true;
 
-    if (rcmail.env.action == '') {	// list mailbox
+    // find the current action
+    if (rcmail.env.action === '' || rcmail.env.action == 'preview')
+        ks_action = 'mailbox';
+    else
+        ks_action = rcmail.env.action;
 
-      if(rcmail.env.ks_functions[e.which]) {
-        this[rcmail.env.ks_functions[e.which]]();
-        return false;
-      }
-
-      switch (e.which) {
-          case 63:		// ? = help
-          //keyboard_shortcuts_show_help();
-          var ks_function = rcmail.env.ks_functions[e.which];
-          this[ks_function]();
-
-          return false;
-        case 65:		// A = mark all as read
-          rcmail.command('select-all', 'page');
-          rcmail.command('mark', 'read');
-          return false;
-        case 67:                // C = collapse-all
-          rcmail.command('collapse-all');
-          return false;
-        case 69:                // E = expand-all
-          rcmail.command('expand-all');
-          return false;
-        case 82:		// R = reply-all
-          if (rcmail.message_list.selection.length == 1)
-          rcmail.command('reply-all');
-          return false;
-        case 85:                // U = expand-unread
-          rcmail.command('expand-unread');
-          return false;
-        case 97:		// a = select all
-          rcmail.command('select-all', 'page');
-          return false;
-        case 99:		// c = compose
-          rcmail.command('compose');
-          return false;
-        case 100:		// d = delete
-          rcmail.command('delete', '', rcmail);
-          return false;
-        case 102:		// f = forward
-          if (rcmail.message_list.selection.length == 1)
-          rcmail.command('forward');
-          return false;
-        case 106:		// j = previous page (similar to Gmail)
-          rcmail.command('previouspage');
-          return false;
-        case 107:		// k = next page (similar to Gmail)
-          rcmail.command('nextpage');
-          return false;
-        case 112:		// p = print
-          if (rcmail.message_list.selection.length == 1)
-          rcmail.command('print');
-          return false;
-        case 114:		// r = reply
-          if (rcmail.message_list.selection.length == 1)
-          rcmail.command('reply');
-          return false;
-        case 115:		// s = search
-          $('#quicksearchbox').focus();
-          $('#quicksearchbox').select();
-          return false;
-        case 117:		// u = update (check for mail)
-          rcmail.command('checkmail');
-          return false;
-      }
-    } else if (rcmail.env.action == 'show' || rcmail.env.action == 'preview') {
-      switch (e.which) {
-        case 82:		// R = reply-all
-          rcmail.command('reply-all');
-          return false;
-        case 99:		// c = compose
-          rcmail.command('compose');
-          return false;
-        case 100:		// d = delete
-          rcmail.command('delete');
-          return false;
-        case 102:		// f = forward
-          rcmail.command('forward');
-          return false;
-        case 106:		// j = previous message (similar to Gmail)
-          rcmail.command('previousmessage');
-          return false;
-        case 107:		// k = next message (similar to Gmail)
-          rcmail.command('nextmessage');
-          return false;
-        case 112:		// p = print
-          rcmail.command('print');
-          return false;
-        case 114:		// r = reply
-          rcmail.command('reply');
-          return false;
-
-      }
+    // check the command arrays for a match
+    if(ks_action in ks_commands) {
+        if(e.which in ks_commands[ks_action]) {
+            rcmail.command(ks_commands[ks_action][e.which]);
+        } else if (e.which in ks_commands.global) {
+            rcmail.command(ks_commands.global[e.which]);
+        }
     }
+
     e.preventDefault();
-  }
-});
+}
+
+// record a key
+function ks_record_key(input,e) {
+    reset_recording();
+
+    // save old key
+    ks_oldkey = input.val();
+
+    // recording
+    input.attr('recording', 'true');
+
+    // empty input
+    input.val('');
+
+    // ask for new key
+    input.keypress(function(i) {
+
+        if (i.which === null)
+           char = String.fromCharCode(i.keyCode);       // old IE
+        else if (i.which !==0 && i.charCode !== 0)
+           char = String.fromCharCode(event.which);      // All others
+        else
+           return;
+
+        i.preventDefault();
+
+        input.val(char);
+
+        $('.keycode').unbind('keypress')
+                     .unbind('blur')
+                     .removeAttr("recording")
+                     .blur();
+
+    });
+
+    input.blur(function(i) {
+        reset_recording();
+    });
+}
+
+// reset the recording data
+function reset_recording() {
+    $(".keycode[recording='true']").val(ks_oldkey)
+                                   .removeAttr('recording');
+}
+
+/**
+ * all keyboard functions
+ */
+
 
 // support functions for each function we support
+
+// show help
 function ks_help() {
   keyboard_shortcuts_show_help();
 }
+
+// mark all visible messages as read
+function ks_markallvisiblemessagesasread() {
+	rcmail.command('select-all', 'page');
+	rcmail.command('mark', 'read');
+	rcmail.command('select-none');
+}
+
+// select all visible messages
+function ks_selectallvisiblemessages() {
+	rcmail.command('select-all', 'page');
+}
+
+// reply-all
+function ks_replyall() {
+	if (rcmail.message_list.selection.length == 1)
+	rcmail.command('reply-all');
+}
+
+// reply
+function ks_reply() {
+	if (rcmail.message_list.selection.length == 1)
+	rcmail.command('reply');
+}
+
+// select all on current page
+function ks_select_all_on_page() {
+	rcmail.command('select-all', 'page');
+}
+
+// forward a message
+function ks_forward() {
+	if (rcmail.message_list.selection.length == 1)
+	rcmail.command('forward');
+}
+
+// print a message
+function ks_print() {
+	if (rcmail.message_list.selection.length == 1)
+	rcmail.command('print');
+}
+
+// search
+function ks_search() {
+	$('#quicksearchbox').focus();
+	$('#quicksearchbox').select();
+}
+
+function keyboard_shortcuts_show_help() {
+  $('#keyboard_shortcuts_help').dialog('open');
+}
+
+
