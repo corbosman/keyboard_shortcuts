@@ -4,44 +4,13 @@
  *
  * Enables some common tasks to be executed with keyboard shortcuts
  *
- * @version 1.4 - 07.07.2010
- * @author Patrik Kullman / Roland 'rosali' Liebl / Cor Bosman <cor@roundcu.be>
+ * @version 3.0
+ * @author Patrik Kullman / Roland 'rosali' Liebl
+ * @author Cor Bosman <cor@roundcu.be>
  * @licence GNU GPL
  *
  **/
- /** *
- **/
 
-/**
- * Shortcuts, list view:
- * ?:   Show shortcut help
- * a:   Select all visible messages
- * A:   Mark all as read (as Google Reader)
- * c:   Compose new message
- * d:   Delete message
- * f:   Forward message
- * j:   Go to previous page of messages (as Gmail)
- * k:   Go to next page of messages (as Gmail)
- * p:   Print message
- * r:   Reply to message
- * R:   Reply to all of message
- * s:   Jump to quicksearch
- * u:   Check for new mail (update)
- *
- * Shortcuts, threads view:
- * E:   Expand all
- * C:   Collapse all
- * U:   Expand Unread
- *
- * Shortcuts, mail view:
- * d:   Delete message
- * f:   Forward message
- * j:   Go to previous message (as Gmail)
- * k:   Go to next message (as Gmail)
- * p:   Print message
- * r:   Reply to message
- * R:   Reply to all of message
- */
 
 class keyboard_shortcuts extends rcube_plugin
 {
@@ -72,9 +41,10 @@ class keyboard_shortcuts extends rcube_plugin
         $this->load_config();
 
         // add the keys to js
-        $commands = json_serialize($this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default')));
-        $this->rcmail->output->add_script("var ks_commands = $commands;", 'foot');
-
+        if(in_array($task, array('mail','compose','addressbook'))) {
+            $commands = json_serialize($this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default')));
+            $this->rcmail->output->add_script("var ks_commands = $commands;", 'foot');
+        }
 
         // set up localization
         $this->add_texts('localization', true);
@@ -123,13 +93,23 @@ class keyboard_shortcuts extends rcube_plugin
                 );
                 ksort($keys);
                 foreach($keys as $key => $command) {
+                    // command title
+                    $title = isset($this->commands[$section][$command]['label']) ? Q($this->gettext($this->commands[$section][$command]['label'])) : Q($this->gettext($command));
 
-                    // create input field
-                    $input = new html_inputfield(array('name' => "_ks_".$section,"[]", 'class' => 'rcmfd_ks_input keycode', 'type' => 'text', 'autocomplete' => 'off', 'value' => chr($key)));
+                    // lightning rode
+                    $hidden_lightning = new html_inputfield(array('name' => "_ks_lightning[$section][]", 'value' => 'lightning'));
+                    // ascii key
+                    $input = new html_inputfield(array('name' => "_ks_ascii[$section][]", 'class' => 'rcmfd_ks_input key', 'type' => 'text', 'autocomplete' => 'off', 'value' => chr($key)));
+
+                    // command
+                    $hidden_command =  new html_hiddenfield(array('name' => "_ks_command[$section][]", 'value' => $command));
+
+                    // key code
+                    $hidden_keycode = new html_hiddenfield(array('name' => "_ks_keycode[$section][]", 'value' => $key, 'class' => 'keycode'));
 
                     $args['blocks'][$section]['options'][$command] = array(
-                        'title' => isset($this->commands[$section][$command]['label']) ? Q($this->gettext($this->commands[$section][$command]['label'])) : Q($this->gettext($command)),
-                        'content' => $input->show()
+                        'title' => $title,
+                        'content' => $input->show() . $hidden_command->show() . $hidden_keycode->show()
                     );
                 }
             }
@@ -139,15 +119,31 @@ class keyboard_shortcuts extends rcube_plugin
         return($args);
     }
 
-    function preferences_save()
+    function preferences_save($args)
     {
-        # code...
+        if($args['section'] == 'keyboard_shortcuts') {
+            if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
+            $prefs = array();
+
+            $input_ascii   = get_input_value('_ks_ascii',   RCUBE_INPUT_POST);
+            $input_command = get_input_value('_ks_command', RCUBE_INPUT_POST);
+            $input_keycode = get_input_value('_ks_keycode', RCUBE_INPUT_POST);
+
+            foreach($input_keycode as $section => $keys) {
+                foreach($keys as $i => $key) {
+                    $prefs[$section][$key] = $input_command[$section][$i];
+                }
+            }
+
+            $args['prefs']['keyboard_shortcuts'] = $prefs;
+        }
+        return $args;
     }
 
     function html_output($p) {
         if ($p['name'] == "listcontrols") {
-            $rcmail = rcmail::get_instance();
-            $skin  = $rcmail->config->get('skin');
+            if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
+            $skin  = $this->rcmail->config->get('skin');
 
             if(!file_exists('plugins/keyboard_shortcuts/skins/' . $skin . '/images/keyboard.png')){
                 $skin = "default";
@@ -173,12 +169,12 @@ class keyboard_shortcuts extends rcube_plugin
             $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
             $c .= "</div>";
 
-            if(!is_object($rcmail->imap)){
-                $rcmail->imap_connect();
+            if(!is_object($thisrcmail->imap)){
+                $this->rcmail->imap_connect();
             }
-            $threading_supported = $rcmail->imap->get_capability('thread=references')
-                || $rcmail->imap->get_capability('thread=orderedsubject')
-                || $rcmail->imap->get_capability('thread=refs');
+            $threading_supported = $this->rcmail->imap->get_capability('thread=references')
+                || $this->rcmail->imap->get_capability('thread=orderedsubject')
+                || $this->rcmail->imap->get_capability('thread=refs');
 
             if ($threading_supported) {
                 $c .= "<div><h4>".$this->gettext("threads")."</h4>";
@@ -207,5 +203,9 @@ class keyboard_shortcuts extends rcube_plugin
             $p['content'] = $c . $p['content'];
         }
         return $p;
+    }
+
+    function xs_log($log) {
+      error_log(print_r($log,1). "\n",3,"/tmp/log");
     }
 }

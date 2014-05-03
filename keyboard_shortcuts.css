@@ -24,15 +24,13 @@
 
 /* icon */
 #sections-table #rcmrowkeyboard_shortcuts td.section {
-    background-image: url('/plugins/keyboard_shortcuts/skins/larry/images/keyboard.png');
-    background-position: 3px 7px;
-    background-size: 28px;
+    background-image: url('/plugins/keyboard_shortcuts/skins/larry/images/icon.png');
+    background-position: 5px 2px;
 }
 
 #sections-table #rcmrowkeyboard_shortcuts.selected td.section {
-    background-image: url('/plugins/keyboard_shortcuts/skins/larry/images/keyboard.png');
-    background-position: 3px 7px;
-    background-size: 28px;
+    background-image: url('/plugins/keyboard_shortcuts/skins/larry/images/icon.png');
+    background-position: 5px -23px;
 }
 
 .rcmfd_ks_input {

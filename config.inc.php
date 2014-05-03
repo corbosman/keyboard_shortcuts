@@ -92,9 +92,5 @@ $rcmail_config['keyboard_shortcuts_default'] = array(
         '112' => 'ks_print',
         '114' => 'ks_reply',
     ),
-    'compose' => array(
-    ),
-    'addressbook' => array(
-    ),
 );
 

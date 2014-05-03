@@ -14,9 +14,12 @@ $(document).ready(function() {
 	});
 
     if(rcmail.env.action == 'edit-prefs') {
-	   $('.keycode').focus(function(e) {
+	   $('.key').focus(function(e) {
 	       ks_record_key($(this),e);
-	   });
+	   }).select(function(e) {
+           // roundcube steals select, which looks ugly and causes problems
+           return false;
+       });
     } else {
         $(document).keypress(function (e) {
             return ks_key_pressed(e);
@@ -63,12 +66,20 @@ function ks_key_pressed (e) {
 
 // record a key
 function ks_record_key(input,e) {
+
+    var disallowed_keys = {
+        10:'return',
+        13:'return',
+        32:'space'
+    };
+
+    // if we're recording, cancel all previous recordings
     reset_recording();
 
     // save old key
     ks_oldkey = input.val();
 
-    // recording
+    // set new recording
     input.attr('recording', 'true');
 
     // empty input
@@ -76,19 +87,29 @@ function ks_record_key(input,e) {
 
     // ask for new key
     input.keypress(function(i) {
+        var keycode, char;
 
-        if (i.which === null)
+        // dont allow these keys
+        if(i.which in disallowed_keys) {
+            reset_recording();
+            i.preventDefault();
+            return true;
+        }
+
+        if (i.which === null) {
            char = String.fromCharCode(i.keyCode);       // old IE
-        else if (i.which !==0 && i.charCode !== 0)
-           char = String.fromCharCode(event.which);      // All others
-        else
-           return;
+           keycode = i.keyCode;
+        } else if (i.which !==0 && i.charCode !== 0) {
+           char = String.fromCharCode(i.which);      // All others
+           keycode = i.which;
+        } else return;
 
         i.preventDefault();
 
         input.val(char);
+        input.parent().find('.keycode').val(keycode);
 
-        $('.keycode').unbind('keypress')
+        $('.key').unbind('keypress')
                      .unbind('blur')
                      .removeAttr("recording")
                      .blur();
@@ -102,8 +123,8 @@ function ks_record_key(input,e) {
 
 // reset the recording data
 function reset_recording() {
-    $(".keycode[recording='true']").val(ks_oldkey)
-                                   .removeAttr('recording');
+    $(".key[recording='true']").val(ks_oldkey)
+                                   .removeAttr('recording').blur();
 }
 
 /**
