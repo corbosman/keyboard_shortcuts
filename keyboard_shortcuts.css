@@ -37,3 +37,21 @@
     width: 25px;
     text-align: center;
 }
+
+a.button.ks_del
+{
+  background: url(/plugins/keyboard_shortcuts/skins/larry/images/del.png) no-repeat;
+  width: 30px;
+  height: 20px;
+  float: right;
+  cursor: pointer;
+}
+
+a.button.ks_add
+{
+  background: url(/plugins/keyboard_shortcuts/skins/larry/images/add.png) no-repeat;
+  width: 30px;
+  height: 20px;
+  float: right;
+  cursor: pointer;
+}

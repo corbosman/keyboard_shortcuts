@@ -19,6 +19,10 @@
  *
  */
 
+// can users edit keys?
+$rcmail_config['keyboard_shortcuts_userconfigurable'] = true;
+
+// supported commands
 $rcmail_config['keyboard_shortcuts_commands'] = array(
     'global' => array(
         'addressbook' => array(),
@@ -59,6 +63,14 @@ $rcmail_config['keyboard_shortcuts_commands'] = array(
     ),
 );
 
+// array of keycodes we dont allow. For quick use in JS, register as keycode=>description.
+$rcmail_config['keyboard_shortcuts_disallowed_keys'] = array(
+    '10' => 'return',
+    '13' => 'return',
+    '32' => 'space'
+);
+
+// default key bindings
 $rcmail_config['keyboard_shortcuts_default'] = array(
     'global' => array(
         '63' => 'ks_help',

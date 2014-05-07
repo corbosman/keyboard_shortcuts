@@ -1,5 +1,6 @@
 var ks_oldkey;
 var ks_action;
+var ks_id = 0;
 
 $(document).ready(function() {
 
@@ -14,24 +15,69 @@ $(document).ready(function() {
 	});
 
     if(rcmail.env.action == 'edit-prefs') {
-	   $('.key').focus(function(e) {
+	   $('form').on('focus', '.key', function(e) {
 	       ks_record_key($(this),e);
 	   }).select(function(e) {
-           // roundcube steals select, which looks ugly and causes problems
+           // roundcube auto selects, which looks ugly and causes problems
            return false;
        });
+
+       // click on remove icon
+       $('.ks_content').on('click', 'a.button.ks_del', function(e) {
+           $(this).closest('tr').remove();
+       });
+
+       // click on add icon
+       $('.ks_content').on('click', 'a.button.ks_add', function(e) {
+           ks_add_input($(this));
+       });
+
     } else {
         $(document).keypress(function (e) {
             return ks_key_pressed(e);
         });
     }
-
-    rcmail.register_command('ks_help', 'ks_help', true);
-
 });
 
+function ks_add_input (e) {
+    var cur_section;
+
+    // get current section
+    cur_section = e.attr('data-section');
+
+    var tr = $('<tr><td class="title"><select name="_ks_command['+cur_section+']" /></td><td><input name="_ks_ascii['+cur_section+'][]" class="rcmfd_ks_input key" type="text" autocomplete="off" value="" data-section="'+cur_section+'" data-id="new'+ks_id+'"><input type="hidden" name="_ks_keycode['+cur_section+'][]" value="" class="keycode" data-section="'+cur_section+'" data-id="new'+ks_id+'"><a class="button ks_del"></a></td></tr>');
+
+    // create command select box
+    var select = tr.find('select');
+    for(var section in keyboard_shortcuts_commands) {
+        if(section == 'global' || section == cur_section) {
+            for(var command in keyboard_shortcuts_commands[section]) {
+                // set label
+                var label = rcmail.get_label(command, 'keyboard_shortcuts');
+
+                // see if we have set a specific label to override
+                if(typeof keyboard_shortcuts_commands[section][command] == 'object') {
+                    if(keyboard_shortcuts_commands[section][command].label) {
+                       label = rcmail.get_label(keyboard_shortcuts_commands[section][command].label, 'keyboard_shortcuts');
+                    }
+                }
+                $("<option />", {value: command, text: label}).appendTo(select);
+            }
+        }
+    }
+    e.closest('tr').before(tr);
+    return;
+
+}
+
+/**
+ * key was pressed, handle the key and run command
+ * @param  {object} e
+ * @return {boolean}
+ */
 function ks_key_pressed (e) {
     var action;
+    var keycode;
     var commands = {};
 
     // special case. If we hit ctrl-enter, and we're composing, and we have focus, then send email
@@ -52,19 +98,43 @@ function ks_key_pressed (e) {
     else
         ks_action = rcmail.env.action;
 
+    // check the key we pressed
+    keycode = ks_handle_key(e);
+
     // check the command arrays for a match
-    if(ks_action in ks_commands) {
-        if(e.which in ks_commands[ks_action]) {
-            rcmail.command(ks_commands[ks_action][e.which]);
-        } else if (e.which in ks_commands.global) {
-            rcmail.command(ks_commands.global[e.which]);
+    if(typeof keyboard_shortcuts === 'object') {
+        if(ks_action in keyboard_shortcuts && keycode in keyboard_shortcuts[ks_action]) {
+            ks_run(keyboard_shortcuts[ks_action][keycode]);
+        } else if(keycode in keyboard_shortcuts.global) {
+            ks_run(keyboard_shortcuts.global[keycode]);
         }
     }
 
     e.preventDefault();
+    return false;
 }
 
-// record a key
+/**
+ * run a command, either an internal command, or an external function
+ * @param  {string} command
+ * @return {}
+ */
+function ks_run(command) {
+    if(rcmail.commands[command]) {
+        rcmail.command(command);
+    } else if(typeof window[command] === 'function') {
+        window[command]();
+    } else {
+        // we cant find a function that matches this
+    }
+}
+
+/**
+ * record a key press in settings
+ * @param  {object} input jquery input object
+ * @param  {object} e     keypress event
+ * @return {boolean}
+ */
 function ks_record_key(input,e) {
 
     var disallowed_keys = {
@@ -74,7 +144,7 @@ function ks_record_key(input,e) {
     };
 
     // if we're recording, cancel all previous recordings
-    reset_recording();
+    ks_reset_recording();
 
     // save old key
     ks_oldkey = input.val();
@@ -90,19 +160,30 @@ function ks_record_key(input,e) {
         var keycode, char;
 
         // dont allow these keys
-        if(i.which in disallowed_keys) {
-            reset_recording();
+        if(i.which in keyboard_shortcuts_disallowed_keys) {
+            rcmail.display_message(rcmail.gettext('invalidkey', 'keyboard_shortcuts'), 'warning', 1500);
+            ks_reset_recording();
             i.preventDefault();
             return true;
         }
 
-        if (i.which === null) {
-           char = String.fromCharCode(i.keyCode);       // old IE
-           keycode = i.keyCode;
-        } else if (i.which !==0 && i.charCode !== 0) {
-           char = String.fromCharCode(i.which);      // All others
-           keycode = i.which;
-        } else return;
+        // check which key we pressed
+        if((keycode = ks_handle_key(i)) === false) {
+            rcmail.display_message(rcmail.gettext('invalidkey', 'keyboard_shortcuts'), 'warning', 1500);
+            ks_reset_recording();
+            i.preventDefault();
+            return true;
+        }
+
+        // check if the key exists
+        if(ks_key_exists(keycode, input)) {
+            rcmail.display_message(rcmail.gettext('keyexists', 'keyboard_shortcuts'), 'warning', 1500);
+            ks_reset_recording();
+            i.preventDefault();
+            return true;
+        }
+
+        char = String.fromCharCode(keycode);
 
         i.preventDefault();
 
@@ -117,22 +198,71 @@ function ks_record_key(input,e) {
     });
 
     input.blur(function(i) {
-        reset_recording();
+        ks_reset_recording();
     });
 }
 
-// reset the recording data
-function reset_recording() {
+/**
+ * check if the key exists
+ * @param  {string} keycode
+ * @param  {object} input Jquery object
+ * @return {boolean}
+ */
+function ks_key_exists(keycode, input) {
+    var found = false, section, id;
+
+    // current section
+    section = input.attr('data-section');
+
+    // current id
+    id      = input.attr('data-id');
+
+    // see if we have the same key in this section or in global
+    input.closest('form').find("input.keycode[value='"+keycode+"']").each(function(e) {
+        var cur_section, cur_id;
+
+        cur_section = $(this).attr('data-section');
+        cur_id      = $(this).attr('data-id');
+
+        if(id != cur_id) {
+            if(section == cur_section || cur_section == 'global') {
+                found = true;
+            }
+        }
+    });
+    return found;
+}
+
+/**
+ * check the key on the event
+ * @param  {event} e
+ * @return {string|false}
+ */
+function ks_handle_key(e) {
+    if (e.which === null) {
+       keycode = e.keyCode;
+    } else if (e.which !==0 && e.charCode !== 0) {
+       keycode = e.which;
+    } else keycode = false;
+
+    return keycode;
+}
+
+/**
+ * reset the recording
+ * @return {}
+ */
+function ks_reset_recording() {
     $(".key[recording='true']").val(ks_oldkey)
                                    .removeAttr('recording').blur();
 }
 
+
+
 /**
- * all keyboard functions
+ * all plugin keyboard functions
  */
 
-
-// support functions for each function we support
 
 // show help
 function ks_help() {
