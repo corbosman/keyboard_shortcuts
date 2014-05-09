@@ -3,65 +3,10 @@
 /**
  *  register shortcut commands
  *
- *  Commands can exist in certain sections only.
- *
- *  global      Command is always available
- *  mailbox     Mailbox View
- *  message     Message View
- *  compose     Compose View
- *  addressbook Addressbook
- *
- *  All commands need to be registered so users can pick them as commands for specific keys.
- *
- *  command   => commandname
- *  label     => optional label, else use command name as label
- *  function  => optional function name to use for command, else use internal command name (see app.js)
- *
  */
 
 // can users edit keys?
 $rcmail_config['keyboard_shortcuts_userconfigurable'] = true;
-
-// supported commands
-$rcmail_config['keyboard_shortcuts_commands'] = array(
-    'global' => array(
-        'addressbook' => array(),
-        'ks_help' => array(),
-        'logout' => array(),
-        'mail' => array(),
-        'settings' => array(),
-    ),
-    'mailbox' => array(
-        'collapse-all' => array(),
-        'compose' => array(),
-        'delete' => array(),
-        'expand-all' => array(),
-        'expand-unread' => array(),
-        'ks_forward' => array('label' => 'forward'),
-        'ks_markallvisiblemessagesasread' => array(),
-        'ks_print' => array('label' => 'print'),
-        'ks_reply' => array('label' => 'reply'),
-        'ks_replyall' => array('label' => 'replyall'),
-        'ks_search' => array('label' => 'search'),
-        'ks_selectallvisiblemessages' => array(),
-        'nextpage' => array(),
-        'previouspage' => array(),
-    ),
-    'show' => array(
-        'compose' => array(),
-        'delete' => array(),
-        'ks_replyall' => array('label' => 'replyall'),
-        'ks_forward' => array('label' => 'forward'),
-        'previousmessage' => array(),
-        'nextmessage' => array(),
-        'ks_print' => array('label' => 'print'),
-        'ks_reply' => array('label' => 'reply'),
-    ),
-    'compose' => array(
-    ),
-    'addressbook' => array(
-    ),
-);
 
 // array of keycodes we dont allow. For quick use in JS, register as keycode=>description.
 $rcmail_config['keyboard_shortcuts_disallowed_keys'] = array(
@@ -105,4 +50,54 @@ $rcmail_config['keyboard_shortcuts_default'] = array(
         '114' => 'ks_reply',
     ),
 );
+
+/**
+ * DONT EDIT BELOW HERE
+ */
+
+// supported commands
+$rcmail_config['keyboard_shortcuts_commands'] = array(
+    'global' => array(
+        'addressbook' => array(),
+        'logout' => array(),
+        'mail' => array(),
+        'settings' => array(),
+    ),
+    'mailbox' => array(
+        'ks_help' => array(),
+        'collapse-all' => array(),
+        'compose' => array(),
+        'delete' => array(),
+        'expand-all' => array(),
+        'expand-unread' => array(),
+        'ks_forward' => array('label' => 'forward'),
+        'ks_markallvisiblemessagesasread' => array(),
+        'ks_print' => array('label' => 'print'),
+        'ks_reply' => array('label' => 'reply'),
+        'ks_replyall' => array('label' => 'replyall'),
+        'ks_search' => array('label' => 'search'),
+        'ks_selectallvisiblemessages' => array(),
+        'nextpage' => array(),
+        'previouspage' => array(),
+        'ks_download' => array('label' => 'download'),
+        'ks_viewsource' => array('label' => 'viewsource'),
+    ),
+    'show' => array(
+        'compose' => array(),
+        'delete' => array(),
+        'ks_replyall' => array('label' => 'replyall'),
+        'ks_forward' => array('label' => 'forward'),
+        'previousmessage' => array(),
+        'nextmessage' => array(),
+        'ks_print' => array('label' => 'print'),
+        'ks_reply' => array('label' => 'reply'),
+        'ks_download' => array('label' => 'download'),
+        'ks_viewsource' => array('label' => 'viewsource'),
+    ),
+    'compose' => array(
+    ),
+    'addressbook' => array(
+    ),
+);
+
 

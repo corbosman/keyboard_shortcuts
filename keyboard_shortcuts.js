@@ -3,39 +3,44 @@ var ks_action;
 var ks_id = 0;
 
 $(document).ready(function() {
+    if(window.rcmail) {
+        // initialize a dialog window
+        $('#keyboard_shortcuts_help').dialog({
+            autoOpen: false,
+            draggable: true,
+            modal: false,
+            resizable: false,
+            width: 750,
+            title: rcmail.gettext("keyboard_shortcuts")
+        });
 
-	// initialize a dialog window
-	$('#keyboard_shortcuts_help').dialog({
-		autoOpen: false,
-		draggable: true,
-		modal: false,
-		resizable: false,
-		width: 750,
-		title: rcmail.gettext("keyboard_shortcuts")
-	});
+        if(rcmail.env.action == 'edit-prefs') {
+            $('form').on('focus', '.key', function(e) {
+                ks_record_key($(this),e);
+            }).select(function(e) {
+               // roundcube auto selects, which looks ugly and causes problems
+               return false;
+           });
 
-    if(rcmail.env.action == 'edit-prefs') {
-	   $('form').on('focus', '.key', function(e) {
-	       ks_record_key($(this),e);
-	   }).select(function(e) {
-           // roundcube auto selects, which looks ugly and causes problems
-           return false;
-       });
+           // click on remove icon
+           $('form').on('click', 'a.button.ks_del', function(e) {
+               $(this).closest('tr').remove();
+               $('.footerleft .button').css('color', 'orange');
+           });
 
-       // click on remove icon
-       $('.ks_content').on('click', 'a.button.ks_del', function(e) {
-           $(this).closest('tr').remove();
-       });
+           // click on add icon
+           $('.ks_content').on('click', 'a.button.ks_add', function(e) {
+               ks_add_input($(this));
+           });
 
-       // click on add icon
-       $('.ks_content').on('click', 'a.button.ks_add', function(e) {
-           ks_add_input($(this));
-       });
+        }
 
-    } else {
         $(document).keypress(function (e) {
             return ks_key_pressed(e);
         });
+
+        // register listen event for new row
+        rcmail.addEventListener('plugin.ks_receive_row', ks_receive_row);
     }
 });
 
@@ -45,28 +50,10 @@ function ks_add_input (e) {
     // get current section
     cur_section = e.attr('data-section');
 
-    var tr = $('<tr><td class="title"><select name="_ks_command['+cur_section+']" /></td><td><input name="_ks_ascii['+cur_section+'][]" class="rcmfd_ks_input key" type="text" autocomplete="off" value="" data-section="'+cur_section+'" data-id="new'+ks_id+'"><input type="hidden" name="_ks_keycode['+cur_section+'][]" value="" class="keycode" data-section="'+cur_section+'" data-id="new'+ks_id+'"><a class="button ks_del"></a></td></tr>');
+    // load new row
+    lock = rcmail.set_busy(true, 'loading');
+    rcmail.http_request('plugin.ks_add_row', '_ks_section='+cur_section+'&_ks_id='+ks_id++, lock);
 
-    // create command select box
-    var select = tr.find('select');
-    for(var section in keyboard_shortcuts_commands) {
-        if(section == 'global' || section == cur_section) {
-            for(var command in keyboard_shortcuts_commands[section]) {
-                // set label
-                var label = rcmail.get_label(command, 'keyboard_shortcuts');
-
-                // see if we have set a specific label to override
-                if(typeof keyboard_shortcuts_commands[section][command] == 'object') {
-                    if(keyboard_shortcuts_commands[section][command].label) {
-                       label = rcmail.get_label(keyboard_shortcuts_commands[section][command].label, 'keyboard_shortcuts');
-                    }
-                }
-                $("<option />", {value: command, text: label}).appendTo(select);
-            }
-        }
-    }
-    e.closest('tr').before(tr);
-    return;
 
 }
 
@@ -137,12 +124,6 @@ function ks_run(command) {
  */
 function ks_record_key(input,e) {
 
-    var disallowed_keys = {
-        10:'return',
-        13:'return',
-        32:'space'
-    };
-
     // if we're recording, cancel all previous recordings
     ks_reset_recording();
 
@@ -164,7 +145,7 @@ function ks_record_key(input,e) {
             rcmail.display_message(rcmail.gettext('invalidkey', 'keyboard_shortcuts'), 'warning', 1500);
             ks_reset_recording();
             i.preventDefault();
-            return true;
+            return false;
         }
 
         // check which key we pressed
@@ -172,7 +153,7 @@ function ks_record_key(input,e) {
             rcmail.display_message(rcmail.gettext('invalidkey', 'keyboard_shortcuts'), 'warning', 1500);
             ks_reset_recording();
             i.preventDefault();
-            return true;
+            return false;
         }
 
         // check if the key exists
@@ -180,7 +161,7 @@ function ks_record_key(input,e) {
             rcmail.display_message(rcmail.gettext('keyexists', 'keyboard_shortcuts'), 'warning', 1500);
             ks_reset_recording();
             i.preventDefault();
-            return true;
+            return false;
         }
 
         char = String.fromCharCode(keycode);
@@ -189,14 +170,16 @@ function ks_record_key(input,e) {
 
         input.val(char);
         input.parent().find('.keycode').val(keycode);
+        $('.footerleft .button').css('color', 'orange');
 
         $('.key').unbind('keypress')
-                     .unbind('blur')
-                     .removeAttr("recording")
-                     .blur();
+                .unbind('blur')
+                .removeAttr("recording")
+                .blur();
 
     });
 
+    // if we click someplace else, reset the recording.
     input.blur(function(i) {
         ks_reset_recording();
     });
@@ -225,7 +208,7 @@ function ks_key_exists(keycode, input) {
         cur_id      = $(this).attr('data-id');
 
         if(id != cur_id) {
-            if(section == cur_section || cur_section == 'global') {
+            if(section == cur_section || cur_section == 'global' || section == 'global') {
                 found = true;
             }
         }
@@ -258,6 +241,10 @@ function ks_reset_recording() {
 }
 
 
+function ks_receive_row(data) {
+    $('.button[data-section="'+data.section+'"]').closest('tr').before(data.row);
+
+}
 
 /**
  * all plugin keyboard functions
@@ -284,13 +271,13 @@ function ks_selectallvisiblemessages() {
 // reply-all
 function ks_replyall() {
 	if (rcmail.message_list.selection.length == 1)
-	rcmail.command('reply-all');
+	   rcmail.command('reply-all');
 }
 
 // reply
 function ks_reply() {
 	if (rcmail.message_list.selection.length == 1)
-	rcmail.command('reply');
+	   rcmail.command('reply');
 }
 
 // select all on current page
@@ -301,13 +288,23 @@ function ks_select_all_on_page() {
 // forward a message
 function ks_forward() {
 	if (rcmail.message_list.selection.length == 1)
-	rcmail.command('forward');
+	   rcmail.command('forward');
 }
 
 // print a message
 function ks_print() {
 	if (rcmail.message_list.selection.length == 1)
-	rcmail.command('print');
+	   rcmail.command('print');
+}
+
+function ks_download() {
+    if (rcmail.message_list.selection.length == 1)
+        rcmail.command('download');
+}
+
+function ks_viewsource() {
+    if (rcmail.message_list.selection.length == 1)
+        rcmail.command('viewsource');
 }
 
 // search

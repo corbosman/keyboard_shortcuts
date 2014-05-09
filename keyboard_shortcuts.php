@@ -15,9 +15,10 @@
 class keyboard_shortcuts extends rcube_plugin
 {
     public $task = 'mail|compose|addressbook|settings';
-    public $noajax = true;
+    //public $noajax = true;
     private $rcmail;
     private $prefs;
+    private $commands;
 
     function init()
     {
@@ -29,6 +30,11 @@ class keyboard_shortcuts extends rcube_plugin
 
         // load config
         $this->load_config();
+
+        if($this->rcmail->output->ajax_call) {
+            $this->register_action('plugin.ks_add_row', array($this, 'add_row'));
+            return;
+        }
 
         // set up hooks
         $this->add_hook('template_container', array($this, 'html_output'));
@@ -83,8 +89,7 @@ class keyboard_shortcuts extends rcube_plugin
     // preferences screen
     function preferences_list($args)
     {
-        if($args['current'] == 'keyboard_shortcuts') {
-            $this->xs_log('section ks');
+        if($args['section'] == 'keyboard_shortcuts') {
             // rcmail
             if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
 
@@ -102,34 +107,21 @@ class keyboard_shortcuts extends rcube_plugin
                     'options' => array()
                 );
                 uksort($keys, 'self::chrsort');
+                xs_log($keys);
                 foreach($keys as $key => $command) {
-                    // command title
-                    $title = isset($this->commands[$section][$command]['label']) ? Q($this->gettext($this->commands[$section][$command]['label'])) : Q($this->gettext($command));
 
-                    // ascii key
-                    $input = html::tag('input', array('name' => "_ks_ascii[$section][]", 'class' => 'rcmfd_ks_input key', 'type' => 'text', 'autocomplete' => 'off', 'value' => chr($key), 'data-section' => $section, 'data-id' => $id));
+                    $title   = $this->create_title($id, $section, $command);
+                    $content = $this->create_row($id++, $section, $key);
 
-                    // command
-                    $hidden_command =  new html_hiddenfield(array('name' => "_ks_command[$section][]", 'value' => $command));
-
-                    // key code
-                    $hidden_keycode = new html_hiddenfield(array('name' => "_ks_keycode[$section][]", 'value' => $key, 'class' => 'keycode', 'data-section' => $section, 'data-id' => $id++));
-
-                    // del button
-                    $button = html::a(array('class' => 'button ks_del'), '');
-
-                    // content
-                    $content = html::tag('span', array('class' => 'ks_content'), $input . $hidden_keycode->show() . $button);
-
-                    $args['blocks'][$section]['options'][$command] = array(
-                        'title' => $title . $hidden_command->show(),
+                    $args['blocks'][$section]['options'][$command.$key] = array(
+                        'title' => $title,
                         'content' => $content
                     );
                 }
-                // add button
+                // plus button
                 $args['blocks'][$section]['options']['add'] = array(
                     'title' => '',
-                    'content' => html::a(array('class' => 'button ks_add', 'data-section' => $section), '')
+                    'content' => html::tag('span', array('class' => 'ks_content'), html::tag('a', array('class' => 'button ks_add', 'data-section' => $section), ''))
                 );
             }
 
@@ -138,10 +130,75 @@ class keyboard_shortcuts extends rcube_plugin
         return($args);
     }
 
-    function create_input($id, $section)
+    function add_row()
     {
-        // get list of commands
-        $commands = $this->rcmail->config->get('keyboard_shortcuts_commands', array());
+        if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
+        $this->add_texts('localization', false);
+
+        // get input
+        $section = get_input_value('_ks_section',   RCUBE_INPUT_GET);
+        $id      = 'new' . get_input_value('_ks_id',   RCUBE_INPUT_GET);
+
+        // create new input row
+        $content =  html::tag('tr', array(),
+                        html::tag('td', array('class' => 'title'), $this->create_title($id, $section)) .
+                        html::tag('td', array(), $this->create_row($id, $section))
+                    );
+
+        // return response
+        $this->rcmail->output->command('plugin.ks_receive_row', array('section' => $section, 'row' => $content));
+    }
+
+    function create_title($id, $section, $command = false)
+    {
+
+        // title
+        if($command !== false) {
+            $title = isset($this->commands[$section][$command]['label']) ? Q($this->gettext($this->commands[$section][$command]['label'])) : Q($this->gettext($command));
+            // command
+            $hidden_command =  new html_hiddenfield(array('name' => "_ks_command[$section][]", 'value' => $command));
+            $content = $title . $hidden_command->show();
+        } else {
+            // get commands
+            if(!$this->commands) $this->commands = $this->rcmail->config->get('keyboard_shortcuts_commands', array());
+
+            // create a select box of the available commands in this section
+            $select = new html_select(array('name' => "_ks_command[$section][]"));
+
+            xs_log($section);
+            xs_log($this->commands);
+            if(is_array($this->commands)) {
+                xs_log('commands');
+                foreach($this->commands[$section] as $command => $options) {
+                    xs_log("command: $command");
+                    $label = $options['label'] ?: $command;
+                    xs_log("label: $label");
+                    $select->add(Q($this->gettext($label)),$command);
+                }
+            }
+
+            $content = $select->show();
+        }
+
+        return $content;
+    }
+
+    function create_row($id, $section, $key = false)
+    {
+
+        // ascii key
+        $input = html::tag('input', array('name' => "_ks_ascii[$section][]", 'class' => 'rcmfd_ks_input key', 'type' => 'text', 'autocomplete' => 'off', 'value' => $key ? chr($key) : '', 'data-section' => $section, 'data-id' => $id));
+
+        // key code
+        $hidden_keycode = new html_hiddenfield(array('name' => "_ks_keycode[$section][]", 'value' => $key, 'class' => 'keycode', 'data-section' => $section, 'data-id' => $id++));
+
+        // del button
+        $button = html::a(array('class' => 'button ks_del'), '');
+
+        // content
+        $content = html::tag('span', array('class' => 'ks_content'), $input . $hidden_keycode->show() . $button);
+
+        return $content;
     }
 
     function preferences_save($args)
@@ -156,7 +213,7 @@ class keyboard_shortcuts extends rcube_plugin
 
             foreach($input_keycode as $section => $keys) {
                 foreach($keys as $i => $key) {
-                    $prefs[$section][$key] = $input_command[$section][$i];
+                    if(is_numeric($key)) $prefs[$section][$key] = $input_command[$section][$i];
                 }
             }
 
