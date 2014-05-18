@@ -5,7 +5,6 @@
  * Enables some common tasks to be executed with keyboard shortcuts
  *
  * @version 3.0
- * @author Patrik Kullman / Roland 'rosali' Liebl
  * @author Cor Bosman <cor@roundcu.be>
  * @licence GNU GPL
  *
@@ -15,10 +14,9 @@
 class keyboard_shortcuts extends rcube_plugin
 {
     public $task = 'mail|compose|addressbook|settings';
-    //public $noajax = true;
     private $rcmail;
-    private $prefs;
-    private $commands;
+    private $config;
+    private $commands = false;
 
     function init()
     {
@@ -31,44 +29,135 @@ class keyboard_shortcuts extends rcube_plugin
         // load config
         $this->load_config();
 
+        // load commands
+        $this->load_config('commands.inc.php');
+
+        // set up localization
+        $this->add_texts('localization', true);
+
+        // ajax calls we support
         if($this->rcmail->output->ajax_call) {
             $this->register_action('plugin.ks_add_row', array($this, 'add_row'));
+            $this->register_action('plugin.ks_get_help', array($this, 'get_help'));
             return;
         }
 
+        // include js
+        $this->include_script('keyboard_shortcuts.js');
+
         // set up hooks
-        $this->add_hook('template_container', array($this, 'html_output'));
+        $this->add_hook('template_container', array($this, 'show_icon'));
+
+        // hooks for settings
         if($this->rcmail->config->get('keyboard_shortcuts_userconfigurable', true) and $this->rcmail->task == 'settings') {
             $this->add_hook('preferences_list', array($this, 'preferences_list'));
             $this->add_hook('preferences_save', array($this, 'preferences_save'));
             $this->add_hook('preferences_sections_list',array($this, 'preferences_section'));
             $this->add_hook('preferences_section_header',array($this, 'preferences_section_header'));
 
-            $disallowed_keys = json_serialize($this->rcmail->config->get('keyboard_shortcuts_disallowed_keys', array()));
-            $keyboard_shortcuts_commands = json_serialize($this->rcmail->config->get('keyboard_shortcuts_commands', array()));
-
-            $this->rcmail->output->add_script("var keyboard_shortcuts_disallowed_keys = $disallowed_keys; var keyboard_shortcuts_commands = $keyboard_shortcuts_commands;", 'foot');
-
-            $this->rcmail->output->add_label('addressbook', 'logout', 'mail', 'settings', 'collapse-all', 'compose', 'expand', 'delete', 'expand-all', 'expand-unread', 'nextpage', 'previouspage', 'nextmessage', 'previousmessage', 'forward', 'print', 'reply', 'replyall','search');
+            $this->config['disallowed_keys'] = $this->rcmail->config->get('keyboard_shortcuts_disallowed_keys', array());
         }
 
-        // include js/css
-        $this->include_stylesheet('keyboard_shortcuts.css');
-        $this->include_script('keyboard_shortcuts.js');
+        // include css
+        $skin = $this->local_skin_path();
+        if (is_file($this->home . "/$skin/keyboard_shortcuts.css")) {
+            $this->include_stylesheet("$skin/keyboard_shortcuts.css");
+        }
 
         // add the keys to js
         if(in_array($this->rcmail->task, array('mail','compose','addressbook','settings'))) {
-            $commands = json_serialize($this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default')));
-            $this->rcmail->output->add_script("var keyboard_shortcuts = $commands;", 'foot');
+
+            $this->config['shortcuts'] = $this->get_shortcuts();
+            $this->config['commands']  = $this->get_commands();
+
+            // we need json output
+            $config = json_serialize($this->config);
+
+            $this->rcmail->output->add_script("Shortcuts.config($config);", 'foot');
         }
 
-        // set up localization
-        $this->add_texts('localization', true);
-
-        // load config file
-        //$this->load_config();
     }
 
+    /**
+     * get all configured commands
+     * @return array
+     */
+    private function get_shortcuts()
+    {
+        // shortcuts
+        $shortcuts = $this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default'));
+
+        // commands
+        //$commands = $this->get_commands();
+
+        //foreach($shortcuts as $section => $keys) {
+        //    foreach($keys as $key => $command) {
+        //        if(!isset($commands[$section][$command])) {
+        //            unset($shortcuts[$section][$key]);
+        //        }
+        //    }
+        //}
+
+        return $shortcuts;
+    }
+
+    /**
+     * get all commands including plugin commands
+     * @return array
+     */
+    public function get_commands()
+    {
+        if($this->commands !== false) return $this->commands;
+
+        // result array
+        $commands = array();
+
+        // load commands from config
+        $config = $this->rcmail->config->get('keyboard_shortcuts_commands', array());
+
+        foreach($config as $action => $acommands) {
+            $commands[$action] = array(
+                'label'     => Q($this->gettext($action)),
+                'commands'  => array()
+            );
+            foreach($acommands as $command => $options) {
+                $commands[$action]['commands'][$command] = $options;
+                $commands[$action]['commands'][$command]['label'] = Q($this->gettext($command));
+            }
+        }
+
+        // read in plugin commands;
+        $plugins = $this->rcmail->plugins->exec_hook('shortcut_register', array());
+
+        foreach($plugins as $plugin => $data) {
+            if(! isset($data['commands']) or count($data['commands']) < 1) continue;
+
+            if( isset($data['actions'])) {
+                foreach($data['actions'] as $action => $label) {
+                    $commands[$action] = array(
+                        'label'     => $label,
+                        'commands'  => array()
+                    );
+                }
+            }
+
+            foreach($data['commands'] as $action => $acommands) {
+                foreach($acommands as $command => $options) {
+                    $commands[$action]['commands'][$command] = $options;
+                }
+            }
+        }
+
+        //$this->commands = $commands;
+
+        return $commands;
+    }
+
+    /**
+     * add header to the preferences section
+     * @param  array $args
+     * @return array
+     */
     function preferences_section_header($args)
     {
         if($args['section'] == 'keyboard_shortcuts') {
@@ -77,7 +166,11 @@ class keyboard_shortcuts extends rcube_plugin
         return $args;
     }
 
-    // add a section to the preferences tab
+    /**
+     * register preferences
+     * @param  array $args
+     * @return array
+     */
     function preferences_section($args) {
         $args['list']['keyboard_shortcuts'] = array(
             'id'      => 'keyboard_shortcuts',
@@ -86,7 +179,11 @@ class keyboard_shortcuts extends rcube_plugin
         return($args);
     }
 
-    // preferences screen
+    /**
+     * preferences screen
+     * @param  array $args
+     * @return array
+     */
     function preferences_list($args)
     {
         if($args['section'] == 'keyboard_shortcuts') {
@@ -94,34 +191,41 @@ class keyboard_shortcuts extends rcube_plugin
             if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
 
             // load shortcuts
-            $this->prefs = $this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default'));
+            $shortcuts = $this->get_shortcuts();
 
             // all available commands
-            $this->commands = $this->rcmail->config->get('keyboard_shortcuts_commands', array());
+            $commands = $this->get_commands();
 
             $id = 0;
             // loop through all sections, and print the configured keys
-            foreach($this->prefs as $section => $keys) {
-                $args['blocks'][$section] = array(
-                    'name' => Q($this->gettext($section)),
+            foreach($commands as $action => $a) {
+
+                // no available commands for this action
+                if(count($a['commands']) < 1) continue;
+
+                // get section label
+                $args['blocks'][$action] = array(
+                    'name' => $a['label'],
                     'options' => array()
                 );
-                uksort($keys, 'self::chrsort');
-                xs_log($keys);
+
+                $keys = $shortcuts[$action] ?: array();
+
                 foreach($keys as $key => $command) {
 
-                    $title   = $this->create_title($id, $section, $command);
-                    $content = $this->create_row($id++, $section, $key);
+                    $title   = $this->create_title($id, $action, $commands, $command);
+                    $content = $this->create_row($id++, $action, $key);
 
-                    $args['blocks'][$section]['options'][$command.$key] = array(
+                    $args['blocks'][$action]['options'][$command.$key] = array(
                         'title' => $title,
                         'content' => $content
                     );
                 }
-                // plus button
-                $args['blocks'][$section]['options']['add'] = array(
+
+                // add plus button
+                $args['blocks'][$action]['options']['add'] = array(
                     'title' => '',
-                    'content' => html::tag('span', array('class' => 'ks_content'), html::tag('a', array('class' => 'button ks_add', 'data-section' => $section), ''))
+                    'content' => html::tag('span', array('class' => 'ks_content'), html::tag('a', array('class' => 'button ks_add', 'data-section' => $action), ''))
                 );
             }
 
@@ -130,7 +234,10 @@ class keyboard_shortcuts extends rcube_plugin
         return($args);
     }
 
-    function add_row()
+    /**
+     * ajax call to create a new preference row
+     */
+    public function add_row()
     {
         if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
         $this->add_texts('localization', false);
@@ -139,9 +246,12 @@ class keyboard_shortcuts extends rcube_plugin
         $section = get_input_value('_ks_section',   RCUBE_INPUT_GET);
         $id      = 'new' . get_input_value('_ks_id',   RCUBE_INPUT_GET);
 
+        // get all commands
+        $commands = $this->get_commands();
+
         // create new input row
         $content =  html::tag('tr', array(),
-                        html::tag('td', array('class' => 'title'), $this->create_title($id, $section)) .
+                        html::tag('td', array('class' => 'title'), $this->create_title($id, $section, $commands)) .
                         html::tag('td', array(), $this->create_row($id, $section))
                     );
 
@@ -149,32 +259,33 @@ class keyboard_shortcuts extends rcube_plugin
         $this->rcmail->output->command('plugin.ks_receive_row', array('section' => $section, 'row' => $content));
     }
 
-    function create_title($id, $section, $command = false)
+    /**
+     * create title field for preferences row
+     * @param  int  $id
+     * @param  string  $section
+     * @param  string|boolean $command
+     * @return string
+     */
+    private function create_title($id, $action, $commands, $command = false)
     {
 
-        // title
         if($command !== false) {
-            $title = isset($this->commands[$section][$command]['label']) ? Q($this->gettext($this->commands[$section][$command]['label'])) : Q($this->gettext($command));
+            // label should always be set
+            $label = isset($commands[$action]['commands'][$command]['label']) ? $commands[$action]['commands'][$command]['label'] : Q($this->gettext($command));
+
             // command
-            $hidden_command =  new html_hiddenfield(array('name' => "_ks_command[$section][]", 'value' => $command));
-            $content = $title . $hidden_command->show();
+            $hidden_command = new html_hiddenfield(array('name' => "_ks_command[$action][]", 'value' => $command));
+
+            $content = $label . $hidden_command->show();
+
         } else {
-            // get commands
-            if(!$this->commands) $this->commands = $this->rcmail->config->get('keyboard_shortcuts_commands', array());
 
-            // create a select box of the available commands in this section
-            $select = new html_select(array('name' => "_ks_command[$section][]"));
+            // create a select box of the available commands in this action
+            $select = new html_select(array('name' => "_ks_command[$action][]"));
 
-            xs_log($section);
-            xs_log($this->commands);
-            if(is_array($this->commands)) {
-                xs_log('commands');
-                foreach($this->commands[$section] as $command => $options) {
-                    xs_log("command: $command");
-                    $label = $options['label'] ?: $command;
-                    xs_log("label: $label");
-                    $select->add(Q($this->gettext($label)),$command);
-                }
+            foreach($commands[$action]['commands'] as $command => $options) {
+                $label = isset($options['label']) ? $options['label'] : Q($this->gettext($command));
+                $select->add($label, $command);
             }
 
             $content = $select->show();
@@ -183,7 +294,14 @@ class keyboard_shortcuts extends rcube_plugin
         return $content;
     }
 
-    function create_row($id, $section, $key = false)
+    /**
+     * create a content field for preferences row
+     * @param  int  $id
+     * @param  string  $section
+     * @param  string|int $key
+     * @return string
+     */
+    private function create_row($id, $section, $key = false)
     {
 
         // ascii key
@@ -201,6 +319,11 @@ class keyboard_shortcuts extends rcube_plugin
         return $content;
     }
 
+    /**
+     * save preferences
+     * @param  array $args
+     * @return array
+     */
     function preferences_save($args)
     {
         if($args['section'] == 'keyboard_shortcuts') {
@@ -217,76 +340,77 @@ class keyboard_shortcuts extends rcube_plugin
                 }
             }
 
+            // sort the arrays on key
+            foreach($prefs as $section => $keys) {
+                uksort($prefs[$section], 'self::chrsort');
+            }
+
             $args['prefs']['keyboard_shortcuts'] = $prefs;
         }
         return $args;
     }
 
-    function html_output($p) {
+    /**
+     * show keyboard icon
+     * @param  array $p
+     * @return array
+     */
+    public function show_icon($p) {
         if ($p['name'] == "listcontrols") {
             if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
-            $skin  = $this->rcmail->config->get('skin');
 
-            if(!file_exists('plugins/keyboard_shortcuts/skins/' . $skin . '/images/keyboard.png')){
-                $skin = "default";
-            }
+            // icon path
+            $icon = sprintf("%s/skins/%s/images/keyboard_icon.png", $this->urlbase, $this->rcmail->config->get('skin', 'larry'));
 
-            $c = "";
-            $c .= '<span id="keyboard_shortcuts_title">' . $this->gettext("title") . ":&nbsp;</span><a id='keyboard_shortcuts_link' href='#' class='button' title='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' onclick='return keyboard_shortcuts_show_help()'><img align='top' src='plugins/keyboard_shortcuts/skins/".$skin."/images/keyboard.png' alt='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' /></a>\n";
-            $c .= "<div id='keyboard_shortcuts_help'>";
-            $c .= "<div><h4>".$this->gettext("mailboxview")."</h4>";
-            $c .= "<div class='shortcut_key'>?</div> ".$this->gettext('help')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>a</div> ".$this->gettext('selectallvisiblemessages')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>A</div> ".$this->gettext('markallvisiblemessagesasread')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>c</div> ".$this->gettext('compose')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>d</div> ".$this->gettext('deletemessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>f</div> ".$this->gettext('forwardmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>j</div> ".$this->gettext('previouspage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>k</div> ".$this->gettext('nextpage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>p</div> ".$this->gettext('printmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>r</div> ".$this->gettext('replytomessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>R</div> ".$this->gettext('replytoallmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>s</div> ".$this->gettext('quicksearch')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>u</div> ".$this->gettext('checkmail')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
-            $c .= "</div>";
-
-            if(!is_object($thisrcmail->imap)){
-                $this->rcmail->imap_connect();
-            }
-            $threading_supported = $this->rcmail->imap->get_capability('thread=references')
-                || $this->rcmail->imap->get_capability('thread=orderedsubject')
-                || $this->rcmail->imap->get_capability('thread=refs');
-
-            if ($threading_supported) {
-                $c .= "<div><h4>".$this->gettext("threads")."</h4>";
-                $c .= "<div class='shortcut_key'>E</div> ".$this->gettext('expand-all')."<br class='clear' />";
-                $c .= "<div class='shortcut_key'>C</div> ".$this->gettext('collapse-all')."<br class='clear' />";
-                $c .= "<div class='shortcut_key'>U</div> ".$this->gettext('expand-unread')."<br class='clear' />";
-                $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
-                $c .= "</div>";
-            }
-            $c .= "<div><h4>".$this->gettext("messagesdisplaying")."</h4>";
-            $c .= "<div class='shortcut_key'>d</div> ".$this->gettext('deletemessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>c</div> ".$this->gettext('compose')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>f</div> ".$this->gettext('forwardmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>j</div> ".$this->gettext('previousmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>k</div> ".$this->gettext('nextmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>p</div> ".$this->gettext('printmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>r</div> ".$this->gettext('replytomessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'>R</div> ".$this->gettext('replytoallmessage')."<br class='clear' />";
-            $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
-            $c .= "</div></div>";
-
-            //$this->prefs = $this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default'));
-
-            //$rcmail->output->set_env('ks_commands', $this->prefs);
-
-            $p['content'] = $c . $p['content'];
+            $content = html::tag('a', array('class' => 'keyboard_shortcuts_icon',
+                                            'href' => '#',
+                                            'title' => $this->gettext("keyboard_shortcuts"),
+                                            'onclick' => 'return Shortcuts.help();'
+                                           ),
+                                html::tag('img', array( 'src' => $icon,
+                                                        'align' => 'top',
+                                                        'alt' => $this->gettext('keyboard_shortcuts'))
+                                )
+                        );
+            $p['content'] = $content . $p['content'];
         }
         return $p;
     }
 
+    /**
+     * display help window
+     */
+    public function get_help()
+    {
+        if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
+
+        $shortcuts = $this->get_shortcuts();
+        $commands  = $this->get_commands();
+
+        $table = new html_table(array('cols' => '2'));
+
+        foreach($shortcuts as $section => $keys) {
+            $table->add(array('class' => 'title', 'colspan' => 2), $this->gettext($section));
+            //$s = html::tag('h4', array(), $this->gettext($section));
+            foreach($keys as $key => $command) {
+                $table->add(array('class' => 'shortcut_key'),  chr($key));
+
+                $table->add(array('class' => 'command'), isset($commands[$section][$command]['label']) ? $this->gettext($commands[$section][$command]['label']) : $this->gettext($command));
+            }
+        }
+
+        $content = html::tag('div', array('class' => 'keyboard_shortcuts_help'), $table->show());
+
+        $this->rcmail->output->command('plugin.ks_receive_help', array('help' => $content));
+
+    }
+
+    /**
+     * sort keycode array by character
+     * @param  string $a
+     * @param  string $b
+     * @return
+     */
     public static function chrsort($a, $b)
     {
         return strcasecmp(chr($a), chr($b));
