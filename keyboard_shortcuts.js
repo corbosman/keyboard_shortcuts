@@ -77,8 +77,7 @@ console.log('loading shortcuts');
        /**
         * keypress listener
         */
-       $(document).keypress(function (e) {
-        console.log('handle keypress');
+       $(document).keydown(function (e) {
            return _handle_keypress(e);
        });
     }
@@ -106,6 +105,8 @@ console.log('loading shortcuts');
         // check the key we pressed
         var keycode = _get_key(e);
 
+        console.log(keycode);
+
         // check the command arrays for a match
         if(typeof _config === 'object' && _config.shortcuts) {
             if(_action in _config.shortcuts && keycode in _config.shortcuts[_action]) {
@@ -126,6 +127,7 @@ console.log('loading shortcuts');
      */
     function _get_key(e)
     {
+        return e.keyCode;
         if (e.which === null) {
            keycode = e.keyCode;
         } else if (e.which !== 0 && e.charCode !== 0) {
