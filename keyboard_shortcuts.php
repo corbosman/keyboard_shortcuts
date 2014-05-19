@@ -50,6 +50,9 @@ class keyboard_shortcuts extends rcube_plugin
 
         // hooks for settings
         if($this->rcmail->config->get('keyboard_shortcuts_userconfigurable', true) and $this->rcmail->task == 'settings') {
+
+            $this->include_script('keycode.js');
+
             $this->add_hook('preferences_list', array($this, 'preferences_list'));
             $this->add_hook('preferences_save', array($this, 'preferences_save'));
             $this->add_hook('preferences_sections_list',array($this, 'preferences_section'));

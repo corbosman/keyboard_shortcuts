@@ -40,6 +40,15 @@ $(document).ready(function() {
      */
     var _rowid = 0;
 
+    var _MODIFIERS_MAP = {
+            16: 'shift',
+            17: 'ctrl',
+            18: 'alt',
+            //91: 'meta',
+            93: 'meta',
+            224: 'meta'
+        };
+
 
 
     /**
@@ -52,7 +61,6 @@ $(document).ready(function() {
         rcmail.addEventListener('plugin.ks_receive_row',  _receive_row);
         rcmail.addEventListener('plugin.ks_receive_help', _receive_help);
 
-console.log('loading shortcuts');
         if(_action == 'edit-prefs') {
             // if you click on a form input, start recording a key
             $('form').on('focus', '.key', function(e) {
@@ -234,9 +242,16 @@ console.log('loading shortcuts');
         input.val('');
 
         // ask for new key
-        input.keypress(function(i) {
+        input.keydown(function(i) {
 
-            var keycode = _get_key(i);
+            //var keycode = _get_key(i);
+            var keycode = KeyCode.translate_event(i);
+            console.log(keycode.code + ' shift=' + keycode.shift + ' alt='+keycode.alt + ' ctrl=' + keycode.ctrl );
+
+            if(_is_modifier(keycode)) return false;
+            console.log(i.keyCode);
+            console.log(String.fromCharCode(i.keyCode));
+            var hotkey = KeyCode.hot_key(keycode);
 
             if((message = _validate_key(keycode, input)) !== true) {
                rcmail.display_message(rcmail.gettext(message, 'keyboard_shortcuts'), 'warning', 1500);
@@ -264,6 +279,12 @@ console.log('loading shortcuts');
         input.blur(function(i) {
             _reset_recording();
         });
+    }
+
+    function _is_modifier(keycode) {
+        if(_MODIFIERS_MAP[keycode.code]) return true;
+        return false;
+        //if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return true;
     }
 
     /**
