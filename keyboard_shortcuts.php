@@ -44,6 +44,7 @@ class keyboard_shortcuts extends rcube_plugin
 
         // include js
         $this->include_script('keyboard_shortcuts.js');
+        $this->include_script('shortcuts.js');
 
         // set up hooks
         $this->add_hook('template_container', array($this, 'show_icon'));
@@ -199,7 +200,6 @@ class keyboard_shortcuts extends rcube_plugin
             // all available commands
             $commands = $this->get_commands();
 
-            $id = 0;
             // loop through all sections, and print the configured keys
             foreach($commands as $action => $a) {
 
@@ -216,8 +216,8 @@ class keyboard_shortcuts extends rcube_plugin
 
                 foreach($keys as $key => $command) {
 
-                    $title   = $this->create_title($id, $action, $commands, $command);
-                    $content = $this->create_row($id++, $action, $key);
+                    $title   = $this->create_title($action, $commands, $command);
+                    $content = $this->create_row($action, $key);
 
                     $args['blocks'][$action]['options'][$command.$key] = array(
                         'title' => $title,
@@ -269,7 +269,7 @@ class keyboard_shortcuts extends rcube_plugin
      * @param  string|boolean $command
      * @return string
      */
-    private function create_title($id, $action, $commands, $command = false)
+    private function create_title($action, $commands, $command = false)
     {
 
         if($command !== false) {
@@ -304,14 +304,14 @@ class keyboard_shortcuts extends rcube_plugin
      * @param  string|int $key
      * @return string
      */
-    private function create_row($id, $section, $key = false)
+    private function create_row($section, $key = false)
     {
 
         // ascii key
-        $input = html::tag('input', array('name' => "_ks_ascii[$section][]", 'class' => 'rcmfd_ks_input key', 'type' => 'text', 'autocomplete' => 'off', 'value' => $key ? chr($key) : '', 'data-section' => $section, 'data-id' => $id));
+        $input = html::tag('input', array('name' => "_ks_ascii[$section][]", 'class' => 'rcmfd_ks_input key', 'type' => 'text', 'autocomplete' => 'off', 'value' => $key ? chr($key) : '', 'data-section' => $section));
 
         // key code
-        $hidden_keycode = new html_hiddenfield(array('name' => "_ks_keycode[$section][]", 'value' => $key, 'class' => 'keycode', 'data-section' => $section, 'data-id' => $id++));
+        $hidden_keycode = new html_hiddenfield(array('name' => "_ks_keycode[$section][]", 'value' => $key, 'class' => 'keycode', 'data-section' => $section));
 
         // del button
         $button = html::a(array('class' => 'button ks_del'), '');
