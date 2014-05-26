@@ -236,6 +236,8 @@ console.log('loading shortcuts');
 
             var keycode = _get_key(i);
 
+            console.log(keycode);
+
             if((message = _validate_key(keycode, input)) !== true) {
                rcmail.display_message(rcmail.gettext(message, 'keyboard_shortcuts'), 'warning', 1500);
                _reset_recording();
