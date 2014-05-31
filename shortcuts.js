@@ -169,7 +169,7 @@
         var keycode = _get_keycode(e);
 
         // skip if we're only hitting a modifier
-        if(_is_modifier(keycode)) return false;
+        if(_is_modifier(keycode)) return true;
 
         // get the modifier
         var modifiers = _get_modifiers(e);
@@ -181,13 +181,17 @@
         if(typeof _config === 'object' && _config.shortcuts) {
             if(_action in _config.shortcuts && sequence in _config.shortcuts[_action]) {
                 _run(_config.shortcuts[_action][sequence],_action);
+                e.preventDefault();
+                return false;
             } else if(sequence in _config.shortcuts.all) {
                 _run(_config.shortcuts.all[sequence], 'all');
+                e.preventDefault();
+                return false;
             }
         }
 
-        e.preventDefault();
-        return false;
+        // we did not find a key, just pass the event along
+        return true;
     }
 
     /**

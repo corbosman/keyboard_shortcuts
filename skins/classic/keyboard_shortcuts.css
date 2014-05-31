@@ -1,0 +1,67 @@
+/* icon on mail screen */
+.keyboard_shortcuts_icon {
+  margin-left: 10px;
+  margin-top: 4px;
+}
+
+/* icon in settings section */
+#sections-table #rcmrowkeyboard_shortcuts td.section {
+    background-image: url('images/icon.png');
+    background-position: 5px 2px;
+}
+
+#sections-table #rcmrowkeyboard_shortcuts.selected td.section {
+    background-image: url('images/icon.png');
+    background-position: 5px -23px;
+}
+
+/* input field in settings */
+.rcmfd_ks_input {
+    width: 120px;
+    text-align: center;
+}
+
+/* del icon in settings */
+a.ks_del
+{
+  background: url('images/del.png') no-repeat;
+  width: 30px;
+  height: 20px;
+  float: right;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* add icon in settings */
+a.ks_add
+{
+  background: url('images/add.png') no-repeat;
+  width: 30px;
+  height: 20px;
+  float: right;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* help window */
+
+.keyboard_shortcuts_help table {
+    width: 100%;
+}
+
+.keyboard_shortcuts_help .title {
+    font-weight: bold;
+    padding: 5px 0;
+    text-align: center;
+}
+
+.keyboard_shortcuts_help .shortcut_key {
+    font-weight: bold;
+}
+
+.keyboard_shortcuts_help .command {
+    padding-left: 21px;
+}
+
