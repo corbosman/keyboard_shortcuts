@@ -10,72 +10,37 @@
  */
 $rcmail_config['keyboard_shortcuts_userconfigurable'] = true;
 
+/**
+ * checking if the server supports threads is expensive. Just tell me.
+ */
+$rcmail_config['keyboard_shortcuts_threads'] = true;
 
 /**
- * we dont allow these key codes
+ * default key bindings
  */
-$rcmail_config['keyboard_shortcuts_disallowed_keys'] = array(
-    '10' => 'return',
-    '13' => 'return',
-    '32' => 'space'
-);
-
-// default key bindings
-//$rcmail_config['keyboard_shortcuts_default'] = array(
-//    'all' => array(
-//        '63' => 'help',
-//        '65' => 'addressbook',
-//        '77' => 'mail',
-//        '83' => 'settings'
-//    ),
-//    'mail' => array(
-//        '67' => 'collapse-all',
-//        '69' => 'expand-all',
-//        '82' => 'replyall',
-//        '85' => 'expand-unread',
-//        '97' => 'select-page',
-//        '99' => 'compose',
-//        '100' => 'delete',
-//        '102' => 'forward',
-//        '106' => 'previouspage',
-//        '107' => 'nextpage',
-//        '109' => 'markallvisiblemessagesasread',
-//        '112' => 'print',
-//        '114' => 'reply',
-//        '115' => 'search',
-//        '107' => 'nextmessage',
-//        '106' => 'previousmessage',
-//    ),
-//    'addressbook' => array(
-//    ),
-//    'compose' => array(
-//    )
-//);
-
 $rcmail_config['keyboard_shortcuts_default'] = array(
     'all' => array(
-        //'191' => 'help',
-        '65' => 'addressbook',
-        '77' => 'mail',
-        '83' => 'settings'
+        'F1' => 'mail',
+        'F2' => 'addressbook',
+        'F3' => 'settings',
+        'F8' => 'help',
+        's' => 'search',
     ),
+
     'mail' => array(
-        '67' => 'collapse-all',
-        //'69' => 'expand-all',
-        //'82' => 'replyall',
-        //'85' => 'expand-unread',
-        //'97' => 'select-page',
-        //'99' => 'compose',
-        //'100' => 'delete',
-        //'102' => 'forward',
-        //'106' => 'previouspage',
-        //'107' => 'nextpage',
-        //'109' => 'markallvisiblemessagesasread',
-        //'112' => 'print',
-        //'114' => 'reply',
-        //'115' => 'search',
-        //'107' => 'nextmessage',
-        //'106' => 'previousmessage',
+        'a' => 'select-page',
+        'c' => 'compose',
+        'd' => 'delete',
+        'f' => 'forward',
+        'i' => 'select-invert',
+        'j' => 'previouspage',
+        'k' => 'nextpage',
+        'p' => 'print',
+        'r' => 'reply',
+        'Shift+r' => 'replyall',
+        'Ctrl+r' => 'mark-read',
+        'Ctrl+u' => 'mark-unread',
+        'x' => 'select-none',
     ),
     'addressbook' => array(
     ),
@@ -83,5 +48,11 @@ $rcmail_config['keyboard_shortcuts_default'] = array(
     )
 );
 
-
-
+/**
+ * if we support threads, add some extra default keys
+ */
+if($rcmail_config['keyboard_shortcuts_threads'] === true) {
+    $rcmail_config['keyboard_shortcuts_default']['mail']['Shift+c'] = 'collapse-all';
+    $rcmail_config['keyboard_shortcuts_default']['mail']['Shift+e'] = 'expand-all';
+    $rcmail_config['keyboard_shortcuts_default']['mail']['Shift+u'] = 'expand-unread';
+}

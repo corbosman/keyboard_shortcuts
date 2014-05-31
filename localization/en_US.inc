@@ -6,7 +6,7 @@ $labels['all'] = 'General Shortcuts';
 $labels['mail'] = 'Mail';
 $labels['title'] = 'Keyboard Shortcuts';
 $labels['keyexists'] = 'This key is already in use';
-$labels['invalidkey'] = 'This key is not allowed';
+$labels['invalidkey'] = 'This key is not supported';
 $labels['multiple_modifiers'] = 'Combinations of shift/ctrl/alt are not supported';
 
 /**
