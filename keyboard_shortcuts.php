@@ -27,6 +27,7 @@ class keyboard_shortcuts extends rcube_plugin
         $this->require_plugin('jqueryui');
 
         // load config
+        $this->load_config('config.inc.php-dist');
         $this->load_config();
 
         // load commands
@@ -56,8 +57,6 @@ class keyboard_shortcuts extends rcube_plugin
             $this->add_hook('preferences_save', array($this, 'preferences_save'));
             $this->add_hook('preferences_sections_list',array($this, 'preferences_section'));
             $this->add_hook('preferences_section_header',array($this, 'preferences_section_header'));
-
-            $this->config['disallowed_keys'] = $this->rcmail->config->get('keyboard_shortcuts_disallowed_keys', array());
         }
 
         // include css
@@ -81,7 +80,7 @@ class keyboard_shortcuts extends rcube_plugin
     }
 
     /**
-     * get all configured commands
+     * get all configured shortcuts
      * @return array
      */
     private function get_shortcuts()

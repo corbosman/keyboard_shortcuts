@@ -48,7 +48,7 @@ $rcmail_config['keyboard_shortcuts_commands'] = array(
 /**
  * if we support threads, add some extra commands
  */
-if($rcmail_config['keyboard_shortcuts_threads'] === true) {
+if(isset($rcmail_config['keyboard_shortcuts_threads']) and $rcmail_config['keyboard_shortcuts_threads'] === true) {
     $rcmail_config['keyboard_shortcuts_commands']['mail']['collapse-all'] = array();
     $rcmail_config['keyboard_shortcuts_commands']['mail']['expand-all'] = array();
     $rcmail_config['keyboard_shortcuts_commands']['mail']['expand-unread'] = array();
