@@ -20,12 +20,9 @@ $rcmail_config['keyboard_shortcuts_commands'] = array(
             'search'        => array()
     ),
     'mail'          => array(
-            'collapse-all'      => array(),
             'compose'           => array(),
             'delete'            => array(),
             'download'          => array(),
-            'expand-all'        => array(),
-            'expand-unread'     => array(),
             'forward'           => array(),
             'mark-flagged'      => array('function' => 'mark', 'parameters' => 'flagged'),
             'mark-read'         => array('function' => 'mark', 'parameters' => 'read'),
@@ -48,5 +45,11 @@ $rcmail_config['keyboard_shortcuts_commands'] = array(
     'compose'       => array(),
 );
 
-
-
+/**
+ * if we support threads, add some extra commands
+ */
+if($rcmail_config['keyboard_shortcuts_threads'] === true) {
+    $rcmail_config['keyboard_shortcuts_commands']['mail']['collapse-all'] = array();
+    $rcmail_config['keyboard_shortcuts_commands']['mail']['expand-all'] = array();
+    $rcmail_config['keyboard_shortcuts_commands']['mail']['expand-unread'] = array();
+}

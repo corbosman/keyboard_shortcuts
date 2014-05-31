@@ -1,6 +1,11 @@
 CHANGELOG keyboard_shortcuts
 ============================
 
+RELEASE 3.0-alpha
+
+- complete rewrite
+- allows for user configuration
+
 RELEASE 2.4
 
 - change how we detect focus

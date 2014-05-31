@@ -44,12 +44,14 @@ class keyboard_shortcuts extends rcube_plugin
 
         // include js
         $this->include_script('keyboard_shortcuts.js');
+        $this->include_script('shortcuts.js');
 
         // set up hooks
         $this->add_hook('template_container', array($this, 'show_icon'));
 
         // hooks for settings
         if($this->rcmail->config->get('keyboard_shortcuts_userconfigurable', true) and $this->rcmail->task == 'settings') {
+
             $this->add_hook('preferences_list', array($this, 'preferences_list'));
             $this->add_hook('preferences_save', array($this, 'preferences_save'));
             $this->add_hook('preferences_sections_list',array($this, 'preferences_section'));
@@ -85,20 +87,7 @@ class keyboard_shortcuts extends rcube_plugin
     private function get_shortcuts()
     {
         // shortcuts
-        $shortcuts = $this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default'));
-
-        // commands
-        //$commands = $this->get_commands();
-
-        //foreach($shortcuts as $section => $keys) {
-        //    foreach($keys as $key => $command) {
-        //        if(!isset($commands[$section][$command])) {
-        //            unset($shortcuts[$section][$key]);
-        //        }
-        //    }
-        //}
-
-        return $shortcuts;
+        return $this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default'));
     }
 
     /**
@@ -148,8 +137,6 @@ class keyboard_shortcuts extends rcube_plugin
             }
         }
 
-        //$this->commands = $commands;
-
         return $commands;
     }
 
@@ -196,7 +183,6 @@ class keyboard_shortcuts extends rcube_plugin
             // all available commands
             $commands = $this->get_commands();
 
-            $id = 0;
             // loop through all sections, and print the configured keys
             foreach($commands as $action => $a) {
 
@@ -213,8 +199,8 @@ class keyboard_shortcuts extends rcube_plugin
 
                 foreach($keys as $key => $command) {
 
-                    $title   = $this->create_title($id, $action, $commands, $command);
-                    $content = $this->create_row($id++, $action, $key);
+                    $title   = $this->create_title($action, $commands, $command);
+                    $content = $this->create_row($action, $key);
 
                     $args['blocks'][$action]['options'][$command.$key] = array(
                         'title' => $title,
@@ -244,15 +230,16 @@ class keyboard_shortcuts extends rcube_plugin
 
         // get input
         $section = get_input_value('_ks_section',   RCUBE_INPUT_GET);
-        $id      = 'new' . get_input_value('_ks_id',   RCUBE_INPUT_GET);
+        //$id      = 'new' . get_input_value('_ks_id',   RCUBE_INPUT_GET);
 
         // get all commands
         $commands = $this->get_commands();
+        xs_log($commands);
 
         // create new input row
         $content =  html::tag('tr', array(),
-                        html::tag('td', array('class' => 'title'), $this->create_title($id, $section, $commands)) .
-                        html::tag('td', array(), $this->create_row($id, $section))
+                        html::tag('td', array('class' => 'title'), $this->create_title($section, $commands)) .
+                        html::tag('td', array(), $this->create_row($section))
                     );
 
         // return response
@@ -266,7 +253,7 @@ class keyboard_shortcuts extends rcube_plugin
      * @param  string|boolean $command
      * @return string
      */
-    private function create_title($id, $action, $commands, $command = false)
+    private function create_title($action, $commands, $command = false)
     {
 
         if($command !== false) {
@@ -301,20 +288,20 @@ class keyboard_shortcuts extends rcube_plugin
      * @param  string|int $key
      * @return string
      */
-    private function create_row($id, $section, $key = false)
+    private function create_row($section, $key = false)
     {
 
-        // ascii key
-        $input = html::tag('input', array('name' => "_ks_ascii[$section][]", 'class' => 'rcmfd_ks_input key', 'type' => 'text', 'autocomplete' => 'off', 'value' => $key ? chr($key) : '', 'data-section' => $section, 'data-id' => $id));
+        // key sequence
+        $input = html::tag('input', array('name' => "_ks_sequence[$section][]", 'class' => 'rcmfd_ks_input key', 'type' => 'text', 'autocomplete' => 'off', 'value' => $key ?: '', 'data-section' => $section));
 
         // key code
-        $hidden_keycode = new html_hiddenfield(array('name' => "_ks_keycode[$section][]", 'value' => $key, 'class' => 'keycode', 'data-section' => $section, 'data-id' => $id++));
+        //$hidden_keycode = new html_hiddenfield(array('name' => "_ks_keycode[$section][]", 'value' => $key, 'class' => 'keycode', 'data-section' => $section));
 
         // del button
         $button = html::a(array('class' => 'button ks_del'), '');
 
         // content
-        $content = html::tag('span', array('class' => 'ks_content'), $input . $hidden_keycode->show() . $button);
+        $content = html::tag('span', array('class' => 'ks_content'), $input . $button);
 
         return $content;
     }
@@ -330,24 +317,39 @@ class keyboard_shortcuts extends rcube_plugin
             if(!$this->rcmail) $this->rcmail = rcmail::get_instance();
             $prefs = array();
 
-            $input_ascii   = get_input_value('_ks_ascii',   RCUBE_INPUT_POST);
+            $input_sequence   = get_input_value('_ks_sequence',   RCUBE_INPUT_POST);
             $input_command = get_input_value('_ks_command', RCUBE_INPUT_POST);
-            $input_keycode = get_input_value('_ks_keycode', RCUBE_INPUT_POST);
 
-            foreach($input_keycode as $section => $keys) {
+            xs_log($input_sequence);
+            xs_log($input_command);
+            foreach($input_sequence as $section => $keys) {
                 foreach($keys as $i => $key) {
-                    if(is_numeric($key)) $prefs[$section][$key] = $input_command[$section][$i];
+                    if($this->validate($key)) {
+                        $prefs[$section][$key] = $input_command[$section][$i];
+                    }
                 }
             }
 
             // sort the arrays on key
             foreach($prefs as $section => $keys) {
-                uksort($prefs[$section], 'self::chrsort');
+                uksort($prefs[$section], 'self::seqsort');
             }
 
             $args['prefs']['keyboard_shortcuts'] = $prefs;
         }
         return $args;
+    }
+
+    /**
+     * validate the key, we probably need to expand this
+     * @param  string $key
+     * @return bool
+     */
+    public function validate($key)
+    {
+        if($key == '') return false;
+
+        return true;
     }
 
     /**
@@ -393,7 +395,7 @@ class keyboard_shortcuts extends rcube_plugin
             $table->add(array('class' => 'title', 'colspan' => 2), $this->gettext($section));
             //$s = html::tag('h4', array(), $this->gettext($section));
             foreach($keys as $key => $command) {
-                $table->add(array('class' => 'shortcut_key'),  chr($key));
+                $table->add(array('class' => 'shortcut_key'),  $key);
 
                 $table->add(array('class' => 'command'), isset($commands[$section][$command]['label']) ? $this->gettext($commands[$section][$command]['label']) : $this->gettext($command));
             }
@@ -406,17 +408,31 @@ class keyboard_shortcuts extends rcube_plugin
     }
 
     /**
-     * sort keycode array by character
+     * sort by key sequence
      * @param  string $a
      * @param  string $b
      * @return
      */
-    public static function chrsort($a, $b)
+    public static function seqsort($a, $b)
     {
-        return strcasecmp(chr($a), chr($b));
+        $modifier_a = '';
+        $modifier_b = '';
+
+        // if we dont have a modifier, just return normal compare
+        if(!strstr($a, '+') and !strstr($b, '+')) return strcasecmp($a, $b);
+
+        if(strstr($a, '+')) {
+            list($modifier_a, $a) = explode('+', $a);
+        }
+
+        if(strstr($b, '+')) {
+            list($modifier_b, $b) = explode('+', $b);
+        }
+        // the two sequences dont contain the same character, just return normal compare without modifier
+        if($a != $b) return strcasecmp($a, $b);
+
+        // same character, different modifier. sort by modifier
+        return strcasecmp($modifier_a, $modifier_b);
     }
 
-    function xs_log($log) {
-      error_log(print_r($log,1). "\n",3,"/tmp/log");
-    }
 }
