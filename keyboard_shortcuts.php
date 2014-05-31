@@ -87,7 +87,7 @@ class keyboard_shortcuts extends rcube_plugin
     private function get_shortcuts()
     {
         // shortcuts
-        return $this->rcmail->config->get('keyboard_shortcuts', $this->rcmail->config->get('keyboard_shortcuts_default'));
+        return $this->rcmail->config->get('keyboard_shortcuts_v3', $this->rcmail->config->get('keyboard_shortcuts_default'));
     }
 
     /**
@@ -234,7 +234,6 @@ class keyboard_shortcuts extends rcube_plugin
 
         // get all commands
         $commands = $this->get_commands();
-        xs_log($commands);
 
         // create new input row
         $content =  html::tag('tr', array(),
@@ -320,8 +319,6 @@ class keyboard_shortcuts extends rcube_plugin
             $input_sequence   = get_input_value('_ks_sequence',   RCUBE_INPUT_POST);
             $input_command = get_input_value('_ks_command', RCUBE_INPUT_POST);
 
-            xs_log($input_sequence);
-            xs_log($input_command);
             foreach($input_sequence as $section => $keys) {
                 foreach($keys as $i => $key) {
                     if($this->validate($key)) {
@@ -335,7 +332,7 @@ class keyboard_shortcuts extends rcube_plugin
                 uksort($prefs[$section], 'self::seqsort');
             }
 
-            $args['prefs']['keyboard_shortcuts'] = $prefs;
+            $args['prefs']['keyboard_shortcuts_v3'] = $prefs;
         }
         return $args;
     }
