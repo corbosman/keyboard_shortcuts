@@ -388,12 +388,13 @@ class keyboard_shortcuts extends rcube_plugin
         $table = new html_table(array('cols' => '2'));
 
         foreach($shortcuts as $section => $keys) {
-            $table->add(array('class' => 'title', 'colspan' => 2), $this->gettext($section));
-            //$s = html::tag('h4', array(), $this->gettext($section));
-            foreach($keys as $key => $command) {
-                $table->add(array('class' => 'shortcut_key'),  $key);
+            if(count($keys) > 0) {
+                $table->add(array('class' => 'title', 'colspan' => 2), $this->gettext($section));
+                foreach($keys as $key => $command) {
+                    $table->add(array('class' => 'shortcut_key'),  $key);
 
-                $table->add(array('class' => 'command'), isset($commands[$section][$command]['label']) ? $this->gettext($commands[$section][$command]['label']) : $this->gettext($command));
+                    $table->add(array('class' => 'command'), isset($commands[$section][$command]['label']) ? $this->gettext($commands[$section][$command]['label']) : $this->gettext($command));
+                }
             }
         }
 
