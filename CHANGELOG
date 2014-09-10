@@ -1,6 +1,10 @@
 CHANGELOG keyboard_shortcuts
 ============================
 
+RELEASE 2.4.1
+
+- fix composer.json
+
 RELEASE 2.4
 
 - change how we detect focus
