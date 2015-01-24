@@ -94,6 +94,9 @@ $(function() {
           $('#quicksearchbox').focus();
           $('#quicksearchbox').select();
           return false;
+        case 116:		// t = togglepreview
+          $('#mailpreviewtoggle')[0].click();
+          return false;
         case 117:		// u = update (check for mail)
           rcmail.command('checkmail');
           return false;
