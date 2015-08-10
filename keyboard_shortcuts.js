@@ -127,7 +127,6 @@ $(function() {
 
       }
     }
-    e.preventDefault();
   }
 });
 
