@@ -82,6 +82,19 @@ $(function() {
         case 107:		// k = next page (similar to Gmail)
           rcmail.command('nextpage');
           return false;
+        case 109:		// m = mark read/unread (similar to Thunderbird)
+          var uid = rcmail.message_list.get_selection();
+          if (uid && uid.length > 0) {
+            var mid = rcmail.message_list.rows[uid[0]].id;
+            if ($('tr#' + mid).hasClass('unread')) {
+              rcmail.command('mark', 'read');
+            } else {
+              rcmail.command('mark', 'unread');
+            }
+          } else {
+            return true;
+          }
+          return false;
         case 112:		// p = print
           if (rcmail.message_list.selection.length == 1)
           rcmail.command('print');
