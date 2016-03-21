@@ -15,5 +15,8 @@
   "support": {
           "email": "cor@roundcu.be",
           "issues": "https://github.com/corbosman/keyboard_shortcuts/issues"
-      }
+      },
+    "require": {
+        "roundcube/plugin-installer": ">=0.1.3"
+    }
 }
