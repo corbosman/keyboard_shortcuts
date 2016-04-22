@@ -19,6 +19,16 @@ $(function() {
     return key_pressed(e);
   });
 
+  // special case. If we hit ctrl-enter, and we're composing, and we have focus (in the HTML editor iframe), then send email
+  // Limitation is that it adds in a line from hitting enter, which is something tinymce seems to do.
+  $(window.setTimeout(function() {
+    $('#composebody_ifr').contents().keydown(function (e) {
+      if (rcmail.env.action == 'compose' && e.which == 13 && e.ctrlKey) {
+        $('.button.send').click();
+        return false;
+      }
+    });
+  }, 1000));
 
   function key_pressed (e) {
     // special case. If we hit ctrl-enter, and we're composing, and we have focus, then send email
