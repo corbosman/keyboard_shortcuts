@@ -22,6 +22,7 @@
  * f:	Forward message
  * j:	Go to previous page of messages (as Gmail)
  * k:	Go to next page of messages (as Gmail)
+ * m:	Mark message(s) read/unread (as Thunderbird)
  * p:	Print message
  * r:	Reply to message
  * R:	Reply to all of message
@@ -81,6 +82,7 @@ class keyboard_shortcuts extends rcube_plugin
         $c .= "<div class='shortcut_key'>?</div> ".$this->gettext('help')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>a</div> ".$this->gettext('selectallvisiblemessages')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>A</div> ".$this->gettext('markallvisiblemessagesasread')."<br class='clear' />";
+        $c .= "<div class='shortcut_key'>m</div> ".$this->gettext('markselected')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>c</div> ".$this->gettext('compose')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>d</div> ".$this->gettext('deletemessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>f</div> ".$this->gettext('forwardmessage')."<br class='clear' />";
