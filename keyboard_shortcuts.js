@@ -3,6 +3,7 @@ function keyboard_shortcuts_show_help() {
 }
 
 $(function() {
+  rcmail.env.keyboard_shortcuts_mark_pending = false;
 
   // initialize a dialog window
   $('#keyboard_shortcuts_help').dialog({
@@ -72,7 +73,20 @@ $(function() {
         case 100:		// d = delete
           rcmail.command('delete', '', rcmail);
           return false;
-        case 102:		// f = forward
+        case 70:		// F = (m)ark un(F)lagged
+	  if (rcmail.env.keyboard_shortcuts_mark_pending) {
+	      rcmail.command('mark', 'unflagged');
+	      clearTimeout(rcmail.env.keyboard_shortcuts_mark_pending);
+	      rcmail.env.keyboard_shortcuts_mark_pending = false;
+	      return false;
+	  }
+        case 102:		// f = forward // or (m)ark (f)lagged
+	  if (rcmail.env.keyboard_shortcuts_mark_pending) {
+	      rcmail.command('mark', 'flagged');
+	      clearTimeout(rcmail.env.keyboard_shortcuts_mark_pending);
+	      rcmail.env.keyboard_shortcuts_mark_pending = false;
+	      return false;
+	  }
           if (rcmail.message_list.selection.length == 1)
           rcmail.command('forward');
           return false;
@@ -86,7 +100,13 @@ $(function() {
           if (rcmail.message_list.selection.length == 1)
           rcmail.command('print');
           return false;
-        case 114:		// r = reply
+        case 114:		// r = reply // or (m)ark (r)ead
+	  if (rcmail.env.keyboard_shortcuts_mark_pending) {
+	      rcmail.command('mark', 'read');
+	      clearTimeout(rcmail.env.keyboard_shortcuts_mark_pending);
+	      rcmail.env.keyboard_shortcuts_mark_pending = false;
+	      return false;
+	  }
           if (rcmail.message_list.selection.length == 1)
           rcmail.command('reply');
           return false;
@@ -94,9 +114,28 @@ $(function() {
           $('#quicksearchbox').focus();
           $('#quicksearchbox').select();
           return false;
-        case 117:		// u = update (check for mail)
+        case 117:		// u = update (check for mail) // or (m)ark (u)nread
+	  if (rcmail.env.keyboard_shortcuts_mark_pending) {
+	      rcmail.command('mark', 'unread');
+	      clearTimeout(rcmail.env.keyboard_shortcuts_mark_pending);
+	      rcmail.env.keyboard_shortcuts_mark_pending = false;
+	      return false;
+	  }
           rcmail.command('checkmail');
           return false;
+        case 118:		// v = Toggle preview
+	  $('#prevpaneswitch,#mailpreviewtoggle').click();
+	  return false;
+        case 109:		// m = Mark as... (read/unread/flagged/unflagged)
+	  if (rcmail.env.keyboard_shortcuts_mark_pending != false) {
+	      clearTimeout(rcmail.env.keyboard_shortcuts_mark_pending);
+	  }
+	  var that = rcmail;
+	  rcmail.env.keyboard_shortcuts_mark_pending = setTimeout(function() {
+	      console.log('resetting that.env.keyboard_shortcuts_mark_pending after 3s');
+	      that.env.keyboard_shortcuts_mark_pending = false;
+	  }, 3000);
+	  return false;
       }
     } else if (rcmail.env.action == 'show' || rcmail.env.action == 'preview') {
       switch (e.which) {
