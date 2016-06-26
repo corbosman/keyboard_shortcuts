@@ -97,6 +97,9 @@ $(function() {
         case 117:		// u = update (check for mail)
           rcmail.command('checkmail');
           return false;
+        case 118:		// v = Toggle preview
+	  $('#prevpaneswitch,#mailpreviewtoggle').click();
+	  return false;
       }
     } else if (rcmail.env.action == 'show' || rcmail.env.action == 'preview') {
       switch (e.which) {
