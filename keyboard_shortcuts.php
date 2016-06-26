@@ -28,6 +28,7 @@
  * s:	Jump to quicksearch
  * u:	Check for new mail (update)
  * V:	Toggle preview
+ * m:	Mark as (r)ead/(u)nread/(f)lagged/un(F)lagged
  *
  * Shortcuts, threads view:
  * E:   Expand all
@@ -93,6 +94,7 @@ class keyboard_shortcuts extends rcube_plugin
         $c .= "<div class='shortcut_key'>s</div> ".$this->gettext('quicksearch')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>u</div> ".$this->gettext('checkmail')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>v</div> ".$this->gettext('previewpane')."<br class='clear' />";
+        $c .= "<div class='shortcut_key'>m</div> ".$this->gettext('keyboard_shortcuts.markmulti')."<br class='clear' />";
         $c .= "<div class='shortcut_key'> </div> <br class='clear' />";
         $c .= "</div>";
 
