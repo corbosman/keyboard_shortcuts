@@ -36,7 +36,7 @@
  * Shortcuts, mail view:
  * d:	Delete message
  * f:	Forward message
- * i:	Go to back to messeage list (as Gmail)
+ * i:	Go to back to message list (as Gmail)
  * j:	Go to previous message (as Gmail)
  * k:	Go to next message (as Gmail)
  * p:	Print message
