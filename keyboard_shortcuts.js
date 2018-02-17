@@ -97,6 +97,9 @@ $(function() {
         case 117:		// u = update (check for mail)
           rcmail.command('checkmail');
           return false;
+        case 122:		// z = archive (move to archive)
+          rcmail.command('plugin.archive');
+          return false;
       }
     } else if (rcmail.env.action == 'show' || rcmail.env.action == 'preview') {
       switch (e.which) {
@@ -124,7 +127,9 @@ $(function() {
         case 114:		// r = reply
           rcmail.command('reply');
           return false;
-
+        case 122:		// z = archive (move to archive)
+          rcmail.command('plugin.archive');
+          return false;
       }
     }
   }

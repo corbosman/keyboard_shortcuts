@@ -27,6 +27,7 @@
  * R:	Reply to all of message
  * s:	Jump to quicksearch
  * u:	Check for new mail (update)
+ * z:	Move message to archive
  *
  * Shortcuts, threads view:
  * E:   Expand all
@@ -41,6 +42,7 @@
  * p:	Print message
  * r:	Reply to message
  * R:	Reply to all of message
+ * z:	Move message to archive
  */
 
 class keyboard_shortcuts extends rcube_plugin
@@ -73,6 +75,7 @@ class keyboard_shortcuts extends rcube_plugin
 
         $this->load_config();
         $keyboard_shortcuts = $rcmail->config->get('keyboard_shortcuts_extras', array());
+        $archive_supported = $rcmail->config->get('archive_mbox');
 
         $c = "";
         $c .= '<span id="keyboard_shortcuts_title">' . $this->gettext("title") . ":&nbsp;</span><a id='keyboard_shortcuts_link' href='#' class='button' title='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' onclick='return keyboard_shortcuts_show_help()'><img align='top' src='plugins/keyboard_shortcuts/skins/".$skin."/images/keyboard.png' alt='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' /></a>\n";
@@ -83,6 +86,9 @@ class keyboard_shortcuts extends rcube_plugin
         $c .= "<div class='shortcut_key'>A</div> ".$this->gettext('markallvisiblemessagesasread')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>c</div> ".$this->gettext('compose')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>d</div> ".$this->gettext('deletemessage')."<br class='clear' />";
+        if (!empty($archive_supported)) {
+          $c .= "<div class='shortcut_key'>z</div> ".$this->gettext('archive.buttontitle')."<br class='clear' />";
+        }
         $c .= "<div class='shortcut_key'>f</div> ".$this->gettext('forwardmessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>j</div> ".$this->gettext('previouspage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>k</div> ".$this->gettext('nextpage')."<br class='clear' />";
@@ -111,6 +117,9 @@ class keyboard_shortcuts extends rcube_plugin
         }
         $c .= "<div><h4>".$this->gettext("messagesdisplaying")."</h4>";
         $c .= "<div class='shortcut_key'>d</div> ".$this->gettext('deletemessage')."<br class='clear' />";
+        if (!empty($archive_supported)) {
+          $c .= "<div class='shortcut_key'>z</div> ".$this->gettext('archive.buttontitle')."<br class='clear' />";
+        }
         $c .= "<div class='shortcut_key'>c</div> ".$this->gettext('compose')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>f</div> ".$this->gettext('forwardmessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>j</div> ".$this->gettext('previousmessage')."<br class='clear' />";
