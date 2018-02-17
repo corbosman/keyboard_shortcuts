@@ -36,6 +36,7 @@
  * Shortcuts, mail view:
  * d:	Delete message
  * f:	Forward message
+ * i:	Go to back to messeage list (as Gmail)
  * j:	Go to previous message (as Gmail)
  * k:	Go to next message (as Gmail)
  * p:	Print message
@@ -113,6 +114,7 @@ class keyboard_shortcuts extends rcube_plugin
         $c .= "<div class='shortcut_key'>d</div> ".$this->gettext('deletemessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>c</div> ".$this->gettext('compose')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>f</div> ".$this->gettext('forwardmessage')."<br class='clear' />";
+        $c .= "<div class='shortcut_key'>i</div> ".$this->gettext('backtolist')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>j</div> ".$this->gettext('previousmessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>k</div> ".$this->gettext('nextmessage')."<br class='clear' />";
         $c .= "<div class='shortcut_key'>p</div> ".$this->gettext('printmessage')."<br class='clear' />";

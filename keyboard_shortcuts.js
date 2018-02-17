@@ -112,6 +112,9 @@ $(function() {
         case 102:		// f = forward
           rcmail.command('forward');
           return false;
+        case 105:		// i = back to list
+          rcmail.command('list');
+          return false;
         case 106:		// j = previous message (similar to Gmail)
           rcmail.command('previousmessage');
           return false;
