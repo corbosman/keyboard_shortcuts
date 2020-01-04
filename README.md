@@ -1,21 +1,14 @@
-keyboard_shortcuts
-==================
+# keyboard_shortcuts
 
-keyboard_shortcuts allows some functionality to be handled with the keyboard. It adds an icon to the mail screen to view all available shortcuts. 
 
-OLD VERSIONS
-------------
+This is a deadend fork of original
+[keyboard_shortcuts](https://github.com/corbosman/keyboard_shortcuts) Roundcube
+plugin repository.
 
-This project has moved from Google Code to git. Older version are available at [Google Code](http://code.google.com/p/roundcube-plugins/downloads/list). This git repository is only for roundcube versions 0.8 and higher.
+Main intention of this fork was to pick up all unmerged but valid changes across
+GitHub before starting with development of next-gen plugin.
 
-CONTACT
--------
-Author:   Cor Bosman (cor@roundcu.be)
-
-Bug reports through github (https://github.com/corbosman/keyboard_shortcuts/issues)
-
-LICENSE
--------
-
-This plugin is distributed under the GNU General Public License Version 2.
-Please read through the file LICENSE for more information about this license.
+Next Generation plugin
+[Keyboard Shortcuts NG](https://github.com/teonsystems/roundcube-plugin-keyboard-shortcuts-ng)
+can be found [here (code)](https://github.com/teonsystems/roundcube-plugin-keyboard-shortcuts-ng)
+and [here (releases)](https://plugins.roundcube.net/packages/teon/keyboard_shortcuts_ng).
