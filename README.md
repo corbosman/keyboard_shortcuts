@@ -1,14 +1,36 @@
-# keyboard_shortcuts
+
+Plugin that enables keyboard shortcuts, like gmail.
+
+Supports _almost all_ possible keyboard shortcuts (any combination of alt, ctrl,
+meta and shift keys), and all of character, number, punctuation, direction, F1-F12
+keys with addition of backspace and delete key + ctrl+enter for send mail.
 
 
-This is a deadend fork of original
-[keyboard_shortcuts](https://github.com/corbosman/keyboard_shortcuts) Roundcube
-plugin repository.
+## Supported roundcube versions
 
-Main intention of this fork was to pick up all unmerged but valid changes across
-GitHub before starting with development of next-gen plugin.
+This plugins have a branch for almost each version of common roundcube, see 
+irt at [https://github.com/roundcubevnz/roundcube-plugin-keyboard_shortcuts/branches](https://github.com/roundcubevnz/roundcube-plugin-keyboard_shortcuts/branches)
 
-Next Generation plugin
-[Keyboard Shortcuts NG](https://github.com/teonsystems/roundcube-plugin-keyboard-shortcuts-ng)
-can be found [here (code)](https://github.com/teonsystems/roundcube-plugin-keyboard-shortcuts-ng)
-and [here (releases)](https://plugins.roundcube.net/packages/teon/keyboard_shortcuts_ng).
+Anyhow: **issues, comments are welcome but are only answered if have a pull request or solution are provided**. 
+Beware that pull requests will probably be integrated very slowly of are a stupid feature or does not fix a problem, as additional comments will be waited for.
+
+
+
+## Installation
+
+Like any normal Roundcube plugin. Use composer.json or use manual way.
+
+See each README.md file in each branch depending of your roundcube version at https://github.com/roundcubevnz/roundcube-plugin-keyboard_shortcuts/branches
+
+
+## Legacy
+
+This plugin came to life as an offspring of original
+[keyboard_shortcuts](https://github.com/corbosman/keyboard_shortcuts) plugin,
+joined by a series of merges of almost all unmerged WORKING changes throughout GitHub.
+
+Remaining parts of keyboard_shortcuts are pending for replacement or rewrite:
+- help screen
+- .css file
+- content in localization/
+- content in skins/
