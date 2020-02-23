@@ -59,7 +59,7 @@ class keyboard_shortcuts extends rcube_plugin
       $this->require_plugin('jqueryui');
 
       if($_SESSION['username'] && empty($_SESSION['plugin.newuserdialog'])){
-        $this->include_stylesheet('keyboard_shortcuts.css');
+		$this->include_stylesheet($this->local_skin_path() .'/keyboard_shortcuts.css');
         $this->include_script('keyboard_shortcuts.js');
         $this->add_hook('template_container', array($this, 'html_output'));
         $this->add_texts('localization', true);
@@ -80,7 +80,7 @@ class keyboard_shortcuts extends rcube_plugin
         $archive_supported = $rcmail->config->get('archive_mbox');
 
         $c = "";
-        $c .= '<span id="keyboard_shortcuts_title">' . $this->gettext("title") . ":&nbsp;</span><a id='keyboard_shortcuts_link' href='#' class='button' title='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' onclick='return keyboard_shortcuts_show_help()'><img align='top' src='plugins/keyboard_shortcuts/skins/".$skin."/images/keyboard.png' alt='".$this->gettext("keyboard_shortcuts")." ".$this->gettext("show")."' /></a>\n";
+        $c .= '<div class="keyboard_shortcuts_title">' . "<a id='keyboard_shortcuts_link' href='#' class='button' title='".$this->gettext("keyboard_shortcuts")."' onclick='return keyboard_shortcuts_show_help()'><img class='caption' src='plugins/keyboard_shortcuts/skins/".$skin."/images/keyboard.png' alt='".$this->gettext("keyboard_shortcuts")."'/></a>\n". $this->gettext("title") . "</span></div>";
         $c .= "<div id='keyboard_shortcuts_help'>";
         $c .= "<div><h4>".$this->gettext("mailboxview")."</h4>";
         $c .= "<div class='shortcut_key'>?</div> ".$this->gettext('help')."<br class='clear' />";
