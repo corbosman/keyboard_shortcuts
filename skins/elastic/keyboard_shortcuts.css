@@ -15,25 +15,33 @@
 }
 
 #keyboard_shortcuts_title {
-  margin-left: 12px;
+	margin-left: 12px;
 }
 
 #keyboard_shortcuts_link {
-  width: 30% !important;
+	width: 31px !important;
 }
 
 div.keyboard_shortcuts_title {
-    vertical-align: text-bottom;
-    display: inline-block;
-    text-align: center;
-    width: 100;
-	font-size: smaller;
+	vertical-align: top;
+	display: inline-block;
 }
 
 img {
-	width: 100%;
+    position: relative;
+    width: 100;
+	height: 100;
 }
 
 .caption {
-    display: block;
+    position: absolute;
+	font-size: smaller;
+	z-index: 999;
+	margin: 0 auto;
+	left: 0;
+	right: 0;
+	top: 43%;
+	text-align: bottom;
+	width: 100%;
+	display: block;
 }
