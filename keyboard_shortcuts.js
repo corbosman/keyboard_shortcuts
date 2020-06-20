@@ -19,20 +19,10 @@ $(function() {
     return key_pressed(e);
   });
 
-  // special case. If we hit ctrl-enter, and we're composing, and we have focus (in the HTML editor iframe), then send email
-  // Limitation is that it adds in a line from hitting enter, which is something tinymce seems to do.
-  $(window.setTimeout(function() {
-    $('#composebody_ifr').contents().keydown(function (e) {
-      if (rcmail.env.action == 'compose' && e.which == 13 && e.ctrlKey) {
-        $('.button.send').click();
-        return false;
-      }
-    });
-  }, 1000));
 
   function key_pressed (e) {
     // special case. If we hit ctrl-enter, and we're composing, and we have focus, then send email
-    if (rcmail.env.action == 'compose' && (e.which == 13 || e.which == 10) && e.ctrlKey && $("*:focus").is("#composebody")) {
+    if (rcmail.env.action == 'compose' && e.which == 13 && e.ctrlKey && $("*:focus").is("#composebody")) {
       $('.button.send').click();
       return false;
     }
@@ -92,19 +82,6 @@ $(function() {
         case 107:		// k = next page (similar to Gmail)
           rcmail.command('nextpage');
           return false;
-        case 109:		// m = mark read/unread (similar to Thunderbird)
-          var uid = rcmail.message_list.get_selection();
-          if (uid && uid.length > 0) {
-            var mid = rcmail.message_list.rows[uid[0]].id;
-            if ($('tr#' + mid).hasClass('unread')) {
-              rcmail.command('mark', 'read');
-            } else {
-              rcmail.command('mark', 'unread');
-            }
-          } else {
-            return true;
-          }
-          return false;
         case 112:		// p = print
           if (rcmail.message_list.selection.length == 1)
           rcmail.command('print');
@@ -116,9 +93,6 @@ $(function() {
         case 115:		// s = search
           $('#quicksearchbox').focus();
           $('#quicksearchbox').select();
-          return false;
-        case 116:		// t = togglepreview
-          $('#mailpreviewtoggle')[0].click();
           return false;
         case 117:		// u = update (check for mail)
           rcmail.command('checkmail');

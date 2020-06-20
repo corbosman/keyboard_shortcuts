@@ -1,5 +1,5 @@
 {
-  "name":"dapphp/keyboard_shortcuts",
+  "name":"cor/keyboard_shortcuts",
   "description":"allows some functionality to be handled with the keyboard",
   "license":"GPL-2.0",
   "homepage":"https://github.com/corbosman/keyboard_shortcuts",
@@ -15,8 +15,5 @@
   "support": {
           "email": "cor@roundcu.be",
           "issues": "https://github.com/corbosman/keyboard_shortcuts/issues"
-      },
-    "require": {
-        "roundcube/plugin-installer": ">=0.1.7"
-    }
+      }
 }
