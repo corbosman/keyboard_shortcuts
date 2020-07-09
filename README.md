@@ -1,36 +1,21 @@
+keyboard_shortcuts
+==================
 
-Plugin that enables keyboard shortcuts, like gmail.
+keyboard_shortcuts allows some functionality to be handled with the keyboard. It adds an icon to the mail screen to view all available shortcuts. 
 
-Supports _almost all_ possible keyboard shortcuts (any combination of alt, ctrl,
-meta and shift keys), and all of character, number, punctuation, direction, F1-F12
-keys with addition of backspace and delete key + ctrl+enter for send mail.
+OLD VERSIONS
+------------
 
+This project has moved from Google Code to git. Older version are available at [Google Code](http://code.google.com/p/roundcube-plugins/downloads/list). This git repository is only for roundcube versions 0.8 and higher.
 
-## Supported roundcube versions
+CONTACT
+-------
+Author:   Cor Bosman (cor@roundcu.be)
 
-This plugins have a branch for almost each version of common roundcube, see 
-irt at [https://github.com/roundcubevnz/roundcube-plugin-keyboard_shortcuts/branches](https://github.com/roundcubevnz/roundcube-plugin-keyboard_shortcuts/branches)
+Bug reports through github (https://github.com/corbosman/keyboard_shortcuts/issues)
 
-Anyhow: **issues, comments are welcome but are only answered if have a pull request or solution are provided**. 
-Beware that pull requests will probably be integrated very slowly of are a stupid feature or does not fix a problem, as additional comments will be waited for.
+LICENSE
+-------
 
-
-
-## Installation
-
-Like any normal Roundcube plugin. Use composer.json or use manual way.
-
-See each README.md file in each branch depending of your roundcube version at https://github.com/roundcubevnz/roundcube-plugin-keyboard_shortcuts/branches
-
-
-## Legacy
-
-This plugin came to life as an offspring of original
-[keyboard_shortcuts](https://github.com/corbosman/keyboard_shortcuts) plugin,
-joined by a series of merges of almost all unmerged WORKING changes throughout GitHub.
-
-Remaining parts of keyboard_shortcuts are pending for replacement or rewrite:
-- help screen
-- .css file
-- content in localization/
-- content in skins/
+This plugin is distributed under the GNU General Public License Version 2.
+Please read through the file LICENSE for more information about this license.
