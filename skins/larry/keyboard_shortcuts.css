@@ -21,7 +21,3 @@
 #keyboard_shortcuts_link {
   width: 31px !important;
 }
-
-.menu a.shortcuts:before {
-	content: "\f11c";
-}
