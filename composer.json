@@ -1,19 +1,21 @@
 {
-  "name":"cor/keyboard_shortcuts",
-  "description":"allows some functionality to be handled with the keyboard",
-  "license":"GPL-2.0",
-  "homepage":"https://github.com/corbosman/keyboard_shortcuts",
+  "name": "texxasrulez/keyboard_shortcuts",
+  "description": "allows some functionality to be handled with the keyboard",
+  "license": "GPL-2.0",
+  "version": "2.6",
+  "homepage": "https://github.com/texxasrulez/roundcube-plugin-keyboard_shortcuts/",
   "type": "roundcube-plugin",
+
   "authors": [
           {
-              "name": "Cor Bosman",
-              "email": "cor@roundcu.be",
-              "homepage": "http://underwa.ter.net",
+              "name": "Gene Hawkins",
+              "email": "texxasrulez@roundcu.be",
+              "homepage": "https://www.genesworld.net",
               "role": "Developer"
           }
       ],
   "support": {
-          "email": "cor@roundcu.be",
-          "issues": "https://github.com/corbosman/keyboard_shortcuts/issues"
+          "email": "texxasrulez@yahoo.com",
+          "issues": "https://github.com/texxasrulez/roundcube-plugin-keyboard_shortcuts/issues"
       }
 }
