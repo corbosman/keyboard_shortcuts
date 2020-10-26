@@ -97,6 +97,7 @@ $(function() {
         case 117:		// u = update (check for mail)
           rcmail.command('checkmail');
           return false;
+        case 101:   // e = archive (similar to Gmail)
         case 122:		// z = archive (move to archive)
           rcmail.command('plugin.archive');
           return false;
