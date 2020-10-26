@@ -1,21 +1,29 @@
 {
-  "name": "texxasrulez/keyboard_shortcuts",
-  "description": "allows some functionality to be handled with the keyboard",
-  "license": "GPL-2.0",
-  "version": "2.6",
-  "homepage": "https://github.com/texxasrulez/roundcube-plugin-keyboard_shortcuts/",
-  "type": "roundcube-plugin",
-
-  "authors": [
-          {
-              "name": "Gene Hawkins",
-              "email": "texxasrulez@roundcu.be",
-              "homepage": "https://www.genesworld.net",
-              "role": "Developer"
-          }
-      ],
-  "support": {
-          "email": "texxasrulez@yahoo.com",
-          "issues": "https://github.com/texxasrulez/roundcube-plugin-keyboard_shortcuts/issues"
-      }
+    "name": "mattanja/keyboard_shortcuts",
+    "description": "Provides keyboard shortcuts for roundcube webmailer",
+    "license": "GPL-2.0",
+    "version": "2.6",
+    "homepage": "https://github.com/mattanja/keyboard_shortcuts/",
+    "type": "roundcube-plugin",
+    "authors": [
+        {
+            "name": "Cor Bosman",
+            "email": "cor@roundcu.be",
+            "homepage": "http://underwa.ter.net",
+            "role": "Developer"
+        },
+        {
+            "name": "Mattanja Kern",
+            "role": "Developer"
+        },
+        {
+            "name": "Gene Hawkins",
+            "email": "texxasrulez@roundcu.be",
+            "homepage": "https://www.genesworld.net",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/mattanja/keyboard_shortcuts/issues"
+    }
 }
