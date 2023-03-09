@@ -4,12 +4,11 @@
  *
  * Enables some common tasks to be executed with keyboard shortcuts
  *
- * @version 1.4 - 07.07.2010
+ * @version 2.4.2 2023-03-09
  * @author Patrik Kullman / Roland 'rosali' Liebl / Cor Bosman <roundcube@wa.ter.net>
- * @licence GNU GPL
+ * @licence GNU General Public License, version 2
+ * @link https://github.com/corbosman/keyboard_shortcuts
  *
- **/
- /** *
  **/
 
 /**
@@ -102,11 +101,10 @@ class keyboard_shortcuts extends rcube_plugin
         $c .= "</div>";
 
         if(!is_object($rcmail->imap)){
-          $rcmail->imap_connect();
+          $rcmail->storage_connect();
         }
-        $threading_supported = $rcmail->imap->get_capability('thread=references')
-          || $rcmail->imap->get_capability('thread=orderedsubject')
-          || $rcmail->imap->get_capability('thread=refs');
+        $threading_supported = $rcmail->config->get('message-threading');
+        $threading_supported = !empty($threading_supported);
 
         if ($threading_supported) {
           $c .= "<div><h4>".$this->gettext("threads")."</h4>";
